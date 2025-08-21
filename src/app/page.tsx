@@ -2,9 +2,11 @@
 
 import { useRouter } from 'next/navigation';
 import { Shield, Code, Share, Zap, Edit3, Lock, Share2, Eye, FileText, Upload } from 'lucide-react';
+import { useState } from 'react';
 
 export default function Home() {
   const router = useRouter();
+  const [navigating, setNavigating] = useState(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -40,21 +42,65 @@ export default function Home() {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <a
-                href={`/create/${Math.random().toString(36).substring(2, 15)}`}
-                className="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors shadow-lg hover:shadow-xl no-underline"
+              <button
+                type="button"
+                onClick={async () => {
+                  if (navigating) return;
+                  setNavigating(true);
+                  const id = Math.random().toString(36).substring(2, 15);
+                  const target = `/create/${id}`;
+                  try {
+                    await router.push(target);
+                    // give the router a tick to start navigation
+                    setTimeout(() => setNavigating(false), 1000);
+                  } catch (err) {
+                    // fallback to hard navigation
+                    window.location.href = target;
+                  }
+                }}
+                className="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors shadow-lg hover:shadow-xl"
               >
-                <Edit3 className="h-5 w-5" />
-                <span>Share Code</span>
-              </a>
+                {navigating ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <span>Creating...</span>
+                  </>
+                ) : (
+                  <>
+                    <Edit3 className="h-5 w-5" />
+                    <span>Share Code</span>
+                  </>
+                )}
+              </button>
               
-              <a
-                href={`/upload/${Math.random().toString(36).substring(2, 15)}`}
-                className="inline-flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors shadow-lg hover:shadow-xl no-underline"
+              <button
+                type="button"
+                onClick={async () => {
+                  if (navigating) return;
+                  setNavigating(true);
+                  const id = Math.random().toString(36).substring(2, 15);
+                  const target = `/upload/${id}`;
+                  try {
+                    await router.push(target);
+                    setTimeout(() => setNavigating(false), 1000);
+                  } catch (err) {
+                    window.location.href = target;
+                  }
+                }}
+                className="inline-flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors shadow-lg hover:shadow-xl"
               >
-                <Upload className="h-5 w-5" />
-                <span>Share Files</span>
-              </a>
+                {navigating ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <span>Creating...</span>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-5 w-5" />
+                    <span>Share Files</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
 
