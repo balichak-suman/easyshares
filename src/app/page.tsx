@@ -51,22 +51,13 @@ export default function Home() {
                   const id = Math.random().toString(36).substring(2, 15);
                   const target = `/create/${id}`;
 
-                  // Attempt client-side navigation, but always have a fast fallback
-                  // router.push may not reject on failure, so use a timed check
-                  void router.push(target);
+                  // Immediate full-page navigation to guarantee it works in all environments
+                  if (typeof window !== 'undefined') {
+                    window.location.assign(target);
+                  }
 
-                  // If navigation hasn't occurred after 300ms, force a full load
-                  const fallback = setTimeout(() => {
-                    if (typeof window !== 'undefined' && window.location.pathname !== target) {
-                      window.location.assign(target);
-                    }
-                  }, 300);
-
-                  // Clear fallback after 3s and reset navigating (in case of failure)
-                  setTimeout(() => {
-                    clearTimeout(fallback);
-                    setNavigating(false);
-                  }, 3000);
+                  // Safety reset in case navigation is prevented
+                  setTimeout(() => setNavigating(false), 3000);
                 }}
                 className="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors shadow-lg hover:shadow-xl"
               >
@@ -92,18 +83,11 @@ export default function Home() {
                   const id = Math.random().toString(36).substring(2, 15);
                   const target = `/upload/${id}`;
 
-                  void router.push(target);
+                  if (typeof window !== 'undefined') {
+                    window.location.assign(target);
+                  }
 
-                  const fallback = setTimeout(() => {
-                    if (typeof window !== 'undefined' && window.location.pathname !== target) {
-                      window.location.assign(target);
-                    }
-                  }, 300);
-
-                  setTimeout(() => {
-                    clearTimeout(fallback);
-                    setNavigating(false);
-                  }, 3000);
+                  setTimeout(() => setNavigating(false), 3000);
                 }}
                 className="inline-flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors shadow-lg hover:shadow-xl"
               >
