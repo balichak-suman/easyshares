@@ -18,28 +18,40 @@ export default function Home() {
   }, []);
 
   const createNewShare = () => {
+    console.log('createNewShare clicked');
     setIsCreatingCode(true);
     // Generate a unique ID for the new share
     const shareId = Math.random().toString(36).substring(2, 15);
+    console.log('Generated shareId:', shareId);
     
     // Use setTimeout to ensure the button shows loading state briefly
     setTimeout(() => {
+      console.log('Navigating to /create/' + shareId);
       router.push(`/create/${shareId}`);
       // Reset after navigation attempt
-      setTimeout(() => setIsCreatingCode(false), 1000);
+      setTimeout(() => {
+        console.log('Resetting isCreatingCode');
+        setIsCreatingCode(false);
+      }, 1000);
     }, 100);
   };
 
   const createNewFileShare = () => {
+    console.log('createNewFileShare clicked');
     setIsCreatingFile(true);
     // Generate a unique ID for the new file share
     const shareId = Math.random().toString(36).substring(2, 15);
+    console.log('Generated file shareId:', shareId);
     
     // Use setTimeout to ensure the button shows loading state briefly
     setTimeout(() => {
+      console.log('Navigating to /upload/' + shareId);
       router.push(`/upload/${shareId}`);
       // Reset after navigation attempt
-      setTimeout(() => setIsCreatingFile(false), 1000);
+      setTimeout(() => {
+        console.log('Resetting isCreatingFile');
+        setIsCreatingFile(false);
+      }, 1000);
     }, 100);
   };
 
