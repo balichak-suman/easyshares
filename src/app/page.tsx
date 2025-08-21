@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Shield, Code, Share, Zap, Edit3, Lock, Share2, Eye } from 'lucide-react';
+import { Shield, Code, Share, Zap, Edit3, Lock, Share2, Eye, FileText, Upload } from 'lucide-react';
 
 export default function Home() {
   const [isCreating, setIsCreating] = useState(false);
@@ -13,6 +13,13 @@ export default function Home() {
     // Generate a unique ID for the new share
     const shareId = Math.random().toString(36).substring(2, 15);
     router.push(`/create/${shareId}`);
+  };
+
+  const createNewFileShare = () => {
+    setIsCreating(true);
+    // Generate a unique ID for the new file share
+    const shareId = Math.random().toString(36).substring(2, 15);
+    router.push(`/upload/${shareId}`);
   };
 
   return (
@@ -44,39 +51,59 @@ export default function Home() {
               <span className="text-blue-600"> Instantly</span>
             </h2>
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Create beautiful code snippets with custom URLs. Password-protected editing, public viewing.
-              Perfect for tutorials, collaboration, and showcasing your work.
+              Create beautiful code snippets with custom URLs or share files up to 10MB. 
+              Password-protected editing, public viewing. Perfect for tutorials, collaboration, and showcasing your work.
             </p>
             
-            <button
-              onClick={createNewShare}
-              disabled={isCreating}
-              className="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors shadow-lg hover:shadow-xl"
-            >
-              {isCreating ? (
-                <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  <span>Creating...</span>
-                </>
-              ) : (
-                <>
-                  <Edit3 className="h-5 w-5" />
-                  <span>Create New Code Share</span>
-                </>
-              )}
-            </button>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <button
+                onClick={createNewShare}
+                disabled={isCreating}
+                className="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors shadow-lg hover:shadow-xl"
+              >
+                {isCreating ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <span>Creating...</span>
+                  </>
+                ) : (
+                  <>
+                    <Edit3 className="h-5 w-5" />
+                    <span>Share Code</span>
+                  </>
+                )}
+              </button>
+              
+              <button
+                onClick={createNewFileShare}
+                disabled={isCreating}
+                className="inline-flex items-center space-x-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors shadow-lg hover:shadow-xl"
+              >
+                {isCreating ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <span>Creating...</span>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-5 w-5" />
+                    <span>Share Files</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Features */}
-          <div className="grid md:grid-cols-3 gap-8 mb-16">
+          <div className="grid md:grid-cols-4 gap-6 mb-16">
             <div className="p-6 bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
               <div className="p-3 bg-green-100 rounded-lg w-fit mx-auto mb-4">
                 <Lock className="h-6 w-6 text-green-600" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Password Protected
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-600 text-sm">
                 Only you can edit your code with your secret password. Others can only view.
               </p>
             </div>
@@ -85,11 +112,11 @@ export default function Home() {
               <div className="p-3 bg-blue-100 rounded-lg w-fit mx-auto mb-4">
                 <Share2 className="h-6 w-6 text-blue-600" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Title-Based URLs
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Custom URLs
               </h3>
-              <p className="text-gray-600">
-                Your title becomes the URL: <code className="bg-gray-100 px-1 rounded">codeshare.io/my-react-code</code>
+              <p className="text-gray-600 text-sm">
+                Your title becomes the URL. Easy to remember and share.
               </p>
             </div>
 
@@ -97,13 +124,36 @@ export default function Home() {
               <div className="p-3 bg-purple-100 rounded-lg w-fit mx-auto mb-4">
                 <Eye className="h-6 w-6 text-purple-600" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Syntax Highlighting
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-600 text-sm">
                 Beautiful syntax highlighting for all popular programming languages.
               </p>
             </div>
+
+            <div className="p-6 bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+              <div className="p-3 bg-orange-100 rounded-lg w-fit mx-auto mb-4">
+                <FileText className="h-6 w-6 text-orange-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                File Sharing
+              </h3>
+              <p className="text-gray-600 text-sm">
+                Share files up to 10MB. Auto-deleted after 3 days for security.
+              </p>
+            </div>
+          </div>
+
+          {/* Auto-deletion notice */}
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-8">
+            <div className="flex items-center space-x-2 text-amber-800">
+              <Shield className="h-5 w-5" />
+              <span className="font-semibold">Auto-Deletion Policy</span>
+            </div>
+            <p className="text-amber-700 mt-2 text-sm">
+              Code shares are automatically deleted after <strong>14 days</strong> and files after <strong>3 days</strong> for security and storage management.
+            </p>
           </div>
 
           {/* How it works */}
