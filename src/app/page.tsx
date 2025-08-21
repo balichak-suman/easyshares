@@ -17,28 +17,30 @@ export default function Home() {
     };
   }, []);
 
-  const createNewShare = async () => {
+  const createNewShare = () => {
     setIsCreatingCode(true);
-    try {
-      // Generate a unique ID for the new share
-      const shareId = Math.random().toString(36).substring(2, 15);
+    // Generate a unique ID for the new share
+    const shareId = Math.random().toString(36).substring(2, 15);
+    
+    // Use setTimeout to ensure the button shows loading state briefly
+    setTimeout(() => {
       router.push(`/create/${shareId}`);
-    } catch (error) {
-      console.error('Navigation error:', error);
-      setIsCreatingCode(false);
-    }
+      // Reset after navigation attempt
+      setTimeout(() => setIsCreatingCode(false), 1000);
+    }, 100);
   };
 
-  const createNewFileShare = async () => {
+  const createNewFileShare = () => {
     setIsCreatingFile(true);
-    try {
-      // Generate a unique ID for the new file share
-      const shareId = Math.random().toString(36).substring(2, 15);
+    // Generate a unique ID for the new file share
+    const shareId = Math.random().toString(36).substring(2, 15);
+    
+    // Use setTimeout to ensure the button shows loading state briefly
+    setTimeout(() => {
       router.push(`/upload/${shareId}`);
-    } catch (error) {
-      console.error('Navigation error:', error);
-      setIsCreatingFile(false);
-    }
+      // Reset after navigation attempt
+      setTimeout(() => setIsCreatingFile(false), 1000);
+    }, 100);
   };
 
   return (
