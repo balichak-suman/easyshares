@@ -1,25 +1,44 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Shield, Code, Share, Zap, Edit3, Lock, Share2, Eye, FileText, Upload } from 'lucide-react';
 
 export default function Home() {
-  const [isCreating, setIsCreating] = useState(false);
+  const [isCreatingCode, setIsCreatingCode] = useState(false);
+  const [isCreatingFile, setIsCreatingFile] = useState(false);
   const router = useRouter();
 
-  const createNewShare = () => {
-    setIsCreating(true);
-    // Generate a unique ID for the new share
-    const shareId = Math.random().toString(36).substring(2, 15);
-    router.push(`/create/${shareId}`);
+  // Reset loading states on component unmount
+  useEffect(() => {
+    return () => {
+      setIsCreatingCode(false);
+      setIsCreatingFile(false);
+    };
+  }, []);
+
+  const createNewShare = async () => {
+    setIsCreatingCode(true);
+    try {
+      // Generate a unique ID for the new share
+      const shareId = Math.random().toString(36).substring(2, 15);
+      router.push(`/create/${shareId}`);
+    } catch (error) {
+      console.error('Navigation error:', error);
+      setIsCreatingCode(false);
+    }
   };
 
-  const createNewFileShare = () => {
-    setIsCreating(true);
-    // Generate a unique ID for the new file share
-    const shareId = Math.random().toString(36).substring(2, 15);
-    router.push(`/upload/${shareId}`);
+  const createNewFileShare = async () => {
+    setIsCreatingFile(true);
+    try {
+      // Generate a unique ID for the new file share
+      const shareId = Math.random().toString(36).substring(2, 15);
+      router.push(`/upload/${shareId}`);
+    } catch (error) {
+      console.error('Navigation error:', error);
+      setIsCreatingFile(false);
+    }
   };
 
   return (
@@ -58,10 +77,10 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <button
                 onClick={createNewShare}
-                disabled={isCreating}
+                disabled={isCreatingCode}
                 className="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors shadow-lg hover:shadow-xl"
               >
-                {isCreating ? (
+                {isCreatingCode ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                     <span>Creating...</span>
@@ -76,10 +95,10 @@ export default function Home() {
               
               <button
                 onClick={createNewFileShare}
-                disabled={isCreating}
+                disabled={isCreatingFile}
                 className="inline-flex items-center space-x-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors shadow-lg hover:shadow-xl"
               >
-                {isCreating ? (
+                {isCreatingFile ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                     <span>Creating...</span>
