@@ -18,41 +18,75 @@ export default function Home() {
   }, []);
 
   const createNewShare = () => {
-    console.log('createNewShare clicked');
+    alert('Share Code button clicked!'); // Temporary debug
+    console.log('=== CREATE NEW SHARE BUTTON CLICKED ===');
     setIsCreatingCode(true);
+    
     // Generate a unique ID for the new share
     const shareId = Math.random().toString(36).substring(2, 15);
     console.log('Generated shareId:', shareId);
     
-    // Use setTimeout to ensure the button shows loading state briefly
+    // Create full URL
+    const targetUrl = `/create/${shareId}`;
+    console.log('Target URL:', targetUrl);
+    
+    // Try multiple navigation methods
     setTimeout(() => {
-      console.log('Navigating to /create/' + shareId);
-      router.push(`/create/${shareId}`);
-      // Reset after navigation attempt
-      setTimeout(() => {
-        console.log('Resetting isCreatingCode');
-        setIsCreatingCode(false);
-      }, 1000);
-    }, 100);
+      try {
+        console.log('Attempting window.location.href navigation...');
+        window.location.href = targetUrl;
+      } catch (error) {
+        console.error('window.location.href failed:', error);
+        try {
+          console.log('Attempting router.push navigation...');
+          router.push(targetUrl);
+        } catch (routerError) {
+          console.error('router.push failed:', routerError);
+          setIsCreatingCode(false);
+        }
+      }
+    }, 200);
+    
+    // Safety reset
+    setTimeout(() => {
+      setIsCreatingCode(false);
+    }, 3000);
   };
 
   const createNewFileShare = () => {
-    console.log('createNewFileShare clicked');
+    alert('Share Files button clicked!'); // Temporary debug
+    console.log('=== CREATE NEW FILE SHARE BUTTON CLICKED ===');
     setIsCreatingFile(true);
+    
     // Generate a unique ID for the new file share
     const shareId = Math.random().toString(36).substring(2, 15);
     console.log('Generated file shareId:', shareId);
     
-    // Use setTimeout to ensure the button shows loading state briefly
+    // Create full URL
+    const targetUrl = `/upload/${shareId}`;
+    console.log('Target URL:', targetUrl);
+    
+    // Try multiple navigation methods
     setTimeout(() => {
-      console.log('Navigating to /upload/' + shareId);
-      router.push(`/upload/${shareId}`);
-      // Reset after navigation attempt
-      setTimeout(() => {
-        console.log('Resetting isCreatingFile');
-        setIsCreatingFile(false);
-      }, 1000);
-    }, 100);
+      try {
+        console.log('Attempting window.location.href navigation...');
+        window.location.href = targetUrl;
+      } catch (error) {
+        console.error('window.location.href failed:', error);
+        try {
+          console.log('Attempting router.push navigation...');
+          router.push(targetUrl);
+        } catch (routerError) {
+          console.error('router.push failed:', routerError);
+          setIsCreatingFile(false);
+        }
+      }
+    }, 200);
+    
+    // Safety reset
+    setTimeout(() => {
+      setIsCreatingFile(false);
+    }, 3000);
   };
 
   return (
