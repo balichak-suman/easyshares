@@ -17,34 +17,46 @@ export default function Home() {
     };
   }, []);
 
-  const createNewShare = () => {
+  const createNewShare = async () => {
     console.log('Share Code button clicked!');
+    setIsCreatingCode(true);
     
-    // Generate a unique ID for the new share
-    const shareId = Math.random().toString(36).substring(2, 15);
-    console.log('Generated shareId:', shareId);
-    
-    // Navigate to create page
-    const targetUrl = `/create/${shareId}`;
-    console.log('Navigating to:', targetUrl);
-    
-    // Try immediate navigation
-    window.location.href = targetUrl;
+    try {
+      // Generate a unique ID for the new share
+      const shareId = Math.random().toString(36).substring(2, 15);
+      console.log('Generated shareId:', shareId);
+      
+      // Navigate to create page  
+      const targetUrl = `/create/${shareId}`;
+      console.log('Navigating to:', targetUrl);
+      
+      // Use Next.js router
+      await router.push(targetUrl);
+    } catch (error) {
+      console.error('Navigation error:', error);
+      setIsCreatingCode(false);
+    }
   };
 
-  const createNewFileShare = () => {
+  const createNewFileShare = async () => {
     console.log('Share Files button clicked!');
+    setIsCreatingFile(true);
     
-    // Generate a unique ID for the new file share
-    const shareId = Math.random().toString(36).substring(2, 15);
-    console.log('Generated file shareId:', shareId);
-    
-    // Navigate to upload page
-    const targetUrl = `/upload/${shareId}`;
-    console.log('Navigating to:', targetUrl);
-    
-    // Try immediate navigation
-    window.location.href = targetUrl;
+    try {
+      // Generate a unique ID for the new file share
+      const shareId = Math.random().toString(36).substring(2, 15);
+      console.log('Generated file shareId:', shareId);
+      
+      // Navigate to upload page
+      const targetUrl = `/upload/${shareId}`;
+      console.log('Navigating to:', targetUrl);
+      
+      // Use Next.js router
+      await router.push(targetUrl);
+    } catch (error) {
+      console.error('Navigation error:', error);
+      setIsCreatingFile(false);
+    }
   };
 
   return (
