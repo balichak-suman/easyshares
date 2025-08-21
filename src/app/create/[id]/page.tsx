@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Editor from '@monaco-editor/react';
-import { Copy, Save, Share2, Lock, Eye, Code, ArrowLeft, Check, Link } from 'lucide-react';
+import { Copy, Save, Share2, Lock, Eye, Code, ArrowLeft, Check } from 'lucide-react';
 
 export default function CreatePage() {
   const [code, setCode] = useState('// Welcome to CodeShare!\n// Write your code here...\n\nfunction hello() {\n    console.log("Hello, World!");\n}');

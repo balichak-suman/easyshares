@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Copy, Code, Lock, Share2, Eye, Edit3 } from 'lucide-react';
+import { Shield, Code, Share, Zap, Edit3, Lock, Share2, Eye } from 'lucide-react';
 
 export default function Home() {
   const [isCreating, setIsCreating] = useState(false);

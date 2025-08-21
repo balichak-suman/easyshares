@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import Editor from '@monaco-editor/react';
 import { Copy, Edit3, Eye, Code, Lock, Check, AlertTriangle } from 'lucide-react';
@@ -145,13 +146,13 @@ export default function DirectSharePage() {
           <AlertTriangle className="h-16 w-16 text-red-500 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Not Found</h1>
           <p className="text-gray-600 mb-6">{error}</p>
-          <a
+          <Link
             href="/"
             className="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
           >
             <Code className="h-4 w-4" />
             <span>Create New Code Share</span>
-          </a>
+          </Link>
         </div>
       </div>
     );
