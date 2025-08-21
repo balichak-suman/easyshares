@@ -18,75 +18,25 @@ export default function Home() {
   }, []);
 
   const createNewShare = () => {
-    alert('Share Code button clicked!'); // Temporary debug
-    console.log('=== CREATE NEW SHARE BUTTON CLICKED ===');
     setIsCreatingCode(true);
     
     // Generate a unique ID for the new share
     const shareId = Math.random().toString(36).substring(2, 15);
-    console.log('Generated shareId:', shareId);
     
-    // Create full URL
+    // Navigate to create page
     const targetUrl = `/create/${shareId}`;
-    console.log('Target URL:', targetUrl);
-    
-    // Try multiple navigation methods
-    setTimeout(() => {
-      try {
-        console.log('Attempting window.location.href navigation...');
-        window.location.href = targetUrl;
-      } catch (error) {
-        console.error('window.location.href failed:', error);
-        try {
-          console.log('Attempting router.push navigation...');
-          router.push(targetUrl);
-        } catch (routerError) {
-          console.error('router.push failed:', routerError);
-          setIsCreatingCode(false);
-        }
-      }
-    }, 200);
-    
-    // Safety reset
-    setTimeout(() => {
-      setIsCreatingCode(false);
-    }, 3000);
+    window.location.href = targetUrl;
   };
 
   const createNewFileShare = () => {
-    alert('Share Files button clicked!'); // Temporary debug
-    console.log('=== CREATE NEW FILE SHARE BUTTON CLICKED ===');
     setIsCreatingFile(true);
     
     // Generate a unique ID for the new file share
     const shareId = Math.random().toString(36).substring(2, 15);
-    console.log('Generated file shareId:', shareId);
     
-    // Create full URL
+    // Navigate to upload page
     const targetUrl = `/upload/${shareId}`;
-    console.log('Target URL:', targetUrl);
-    
-    // Try multiple navigation methods
-    setTimeout(() => {
-      try {
-        console.log('Attempting window.location.href navigation...');
-        window.location.href = targetUrl;
-      } catch (error) {
-        console.error('window.location.href failed:', error);
-        try {
-          console.log('Attempting router.push navigation...');
-          router.push(targetUrl);
-        } catch (routerError) {
-          console.error('router.push failed:', routerError);
-          setIsCreatingFile(false);
-        }
-      }
-    }, 200);
-    
-    // Safety reset
-    setTimeout(() => {
-      setIsCreatingFile(false);
-    }, 3000);
+    window.location.href = targetUrl;
   };
 
   return (
