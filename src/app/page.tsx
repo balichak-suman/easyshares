@@ -44,19 +44,29 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <button
                 type="button"
-                onClick={async () => {
+                disabled={navigating}
+                onClick={() => {
                   if (navigating) return;
                   setNavigating(true);
                   const id = Math.random().toString(36).substring(2, 15);
                   const target = `/create/${id}`;
-                  try {
-                    await router.push(target);
-                    // give the router a tick to start navigation
-                    setTimeout(() => setNavigating(false), 1000);
-                  } catch (err) {
-                    // fallback to hard navigation
-                    window.location.href = target;
-                  }
+
+                  // Attempt client-side navigation, but always have a fast fallback
+                  // router.push may not reject on failure, so use a timed check
+                  void router.push(target);
+
+                  // If navigation hasn't occurred after 300ms, force a full load
+                  const fallback = setTimeout(() => {
+                    if (typeof window !== 'undefined' && window.location.pathname !== target) {
+                      window.location.assign(target);
+                    }
+                  }, 300);
+
+                  // Clear fallback after 3s and reset navigating (in case of failure)
+                  setTimeout(() => {
+                    clearTimeout(fallback);
+                    setNavigating(false);
+                  }, 3000);
                 }}
                 className="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors shadow-lg hover:shadow-xl"
               >
@@ -75,17 +85,25 @@ export default function Home() {
               
               <button
                 type="button"
-                onClick={async () => {
+                disabled={navigating}
+                onClick={() => {
                   if (navigating) return;
                   setNavigating(true);
                   const id = Math.random().toString(36).substring(2, 15);
                   const target = `/upload/${id}`;
-                  try {
-                    await router.push(target);
-                    setTimeout(() => setNavigating(false), 1000);
-                  } catch (err) {
-                    window.location.href = target;
-                  }
+
+                  void router.push(target);
+
+                  const fallback = setTimeout(() => {
+                    if (typeof window !== 'undefined' && window.location.pathname !== target) {
+                      window.location.assign(target);
+                    }
+                  }, 300);
+
+                  setTimeout(() => {
+                    clearTimeout(fallback);
+                    setNavigating(false);
+                  }, 3000);
                 }}
                 className="inline-flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors shadow-lg hover:shadow-xl"
               >
