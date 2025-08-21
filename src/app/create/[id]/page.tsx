@@ -193,7 +193,7 @@ export default function CreatePage() {
                 <div className="p-2 bg-blue-600 rounded-lg">
                   <Code className="h-6 w-6 text-white" />
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900">CodeShare</h1>
+                <h1 className="text-2xl font-bold text-gray-900">ShareIt</h1>
               </div>
             </div>
             

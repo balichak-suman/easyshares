@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CodeShare - Share Code Securely",
-  description: "Create password-protected code snippets that only you can edit. Perfect for sharing code with colleagues, students, or clients.",
+  title: "ShareIt - Share Code Instantly",
+  description: "Create beautiful code snippets with password protection and custom URLs. Built by Balichak Suman for seamless code sharing.",
 };
 
 export default function RootLayout({

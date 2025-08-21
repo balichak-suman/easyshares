@@ -25,7 +25,7 @@ export default function Home() {
               <div className="p-2 bg-blue-600 rounded-lg">
                 <Code className="h-6 w-6 text-white" />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">CodeShare</h1>
+              <h1 className="text-2xl font-bold text-gray-900">ShareIt</h1>
             </div>
             <div className="text-sm text-gray-600">
               Share code snippets securely
@@ -41,11 +41,11 @@ export default function Home() {
           <div className="mb-16">
             <h2 className="text-5xl font-bold text-gray-900 mb-6">
               Share Code
-              <span className="text-blue-600"> Securely</span>
+              <span className="text-blue-600"> Instantly</span>
             </h2>
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Create code snippets with custom titles as URLs. Only you can edit with your password, others can view.
-              Perfect for sharing code with colleagues, students, or clients.
+              Create beautiful code snippets with custom URLs. Password-protected editing, public viewing.
+              Perfect for tutorials, collaboration, and showcasing your work.
             </p>
             
             <button
@@ -140,7 +140,8 @@ export default function Home() {
       <footer className="border-t border-gray-200 bg-white/80 backdrop-blur-sm mt-16">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center text-gray-600">
-            <p>&copy; 2025 CodeShare. Built with Next.js and TypeScript.</p>
+            <p>&copy; 2025 ShareIt. Created by <span className="font-semibold text-blue-600">Balichak Suman</span></p>
+            <p className="text-sm mt-1">Built with Next.js, TypeScript & Monaco Editor</p>
           </div>
         </div>
       </footer>
