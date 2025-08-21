@@ -18,8 +18,6 @@ export default function Home() {
   }, []);
 
   const createNewShare = () => {
-    setIsCreatingCode(true);
-    
     // Generate a unique ID for the new share
     const shareId = Math.random().toString(36).substring(2, 15);
     
@@ -29,8 +27,6 @@ export default function Home() {
   };
 
   const createNewFileShare = () => {
-    setIsCreatingFile(true);
-    
     // Generate a unique ID for the new file share
     const shareId = Math.random().toString(36).substring(2, 15);
     
