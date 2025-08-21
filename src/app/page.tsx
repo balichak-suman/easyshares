@@ -1,63 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Shield, Code, Share, Zap, Edit3, Lock, Share2, Eye, FileText, Upload } from 'lucide-react';
 
 export default function Home() {
-  const [isCreatingCode, setIsCreatingCode] = useState(false);
-  const [isCreatingFile, setIsCreatingFile] = useState(false);
   const router = useRouter();
-
-  // Reset loading states on component unmount
-  useEffect(() => {
-    return () => {
-      setIsCreatingCode(false);
-      setIsCreatingFile(false);
-    };
-  }, []);
-
-  const createNewShare = async () => {
-    console.log('Share Code button clicked!');
-    setIsCreatingCode(true);
-    
-    try {
-      // Generate a unique ID for the new share
-      const shareId = Math.random().toString(36).substring(2, 15);
-      console.log('Generated shareId:', shareId);
-      
-      // Navigate to create page  
-      const targetUrl = `/create/${shareId}`;
-      console.log('Navigating to:', targetUrl);
-      
-      // Use Next.js router
-      await router.push(targetUrl);
-    } catch (error) {
-      console.error('Navigation error:', error);
-      setIsCreatingCode(false);
-    }
-  };
-
-  const createNewFileShare = async () => {
-    console.log('Share Files button clicked!');
-    setIsCreatingFile(true);
-    
-    try {
-      // Generate a unique ID for the new file share
-      const shareId = Math.random().toString(36).substring(2, 15);
-      console.log('Generated file shareId:', shareId);
-      
-      // Navigate to upload page
-      const targetUrl = `/upload/${shareId}`;
-      console.log('Navigating to:', targetUrl);
-      
-      // Use Next.js router
-      await router.push(targetUrl);
-    } catch (error) {
-      console.error('Navigation error:', error);
-      setIsCreatingFile(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -93,41 +40,21 @@ export default function Home() {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <button
-                onClick={createNewShare}
-                disabled={isCreatingCode}
-                className="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors shadow-lg hover:shadow-xl"
+              <a
+                href={`/create/${Math.random().toString(36).substring(2, 15)}`}
+                className="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors shadow-lg hover:shadow-xl no-underline"
               >
-                {isCreatingCode ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    <span>Creating...</span>
-                  </>
-                ) : (
-                  <>
-                    <Edit3 className="h-5 w-5" />
-                    <span>Share Code</span>
-                  </>
-                )}
-              </button>
+                <Edit3 className="h-5 w-5" />
+                <span>Share Code</span>
+              </a>
               
-              <button
-                onClick={createNewFileShare}
-                disabled={isCreatingFile}
-                className="inline-flex items-center space-x-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors shadow-lg hover:shadow-xl"
+              <a
+                href={`/upload/${Math.random().toString(36).substring(2, 15)}`}
+                className="inline-flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors shadow-lg hover:shadow-xl no-underline"
               >
-                {isCreatingFile ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    <span>Creating...</span>
-                  </>
-                ) : (
-                  <>
-                    <Upload className="h-5 w-5" />
-                    <span>Share Files</span>
-                  </>
-                )}
-              </button>
+                <Upload className="h-5 w-5" />
+                <span>Share Files</span>
+              </a>
             </div>
           </div>
 
