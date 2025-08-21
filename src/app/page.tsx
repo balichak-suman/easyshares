@@ -18,20 +18,32 @@ export default function Home() {
   }, []);
 
   const createNewShare = () => {
+    console.log('Share Code button clicked!');
+    
     // Generate a unique ID for the new share
     const shareId = Math.random().toString(36).substring(2, 15);
+    console.log('Generated shareId:', shareId);
     
     // Navigate to create page
     const targetUrl = `/create/${shareId}`;
+    console.log('Navigating to:', targetUrl);
+    
+    // Try immediate navigation
     window.location.href = targetUrl;
   };
 
   const createNewFileShare = () => {
+    console.log('Share Files button clicked!');
+    
     // Generate a unique ID for the new file share
     const shareId = Math.random().toString(36).substring(2, 15);
+    console.log('Generated file shareId:', shareId);
     
     // Navigate to upload page
     const targetUrl = `/upload/${shareId}`;
+    console.log('Navigating to:', targetUrl);
+    
+    // Try immediate navigation
     window.location.href = targetUrl;
   };
 
