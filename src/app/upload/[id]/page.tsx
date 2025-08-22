@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import Link from 'next/link';
 import { Upload, ArrowLeft, Lock, Eye, EyeOff, Share2, FileText, AlertCircle, Copy, Check } from 'lucide-react';
 import Footer from '@/components/Footer';
 
@@ -148,23 +149,17 @@ export default function UploadPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-950 font-sans text-gray-100">
       {/* Header */}
-      <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm">
+      <header className="border-b border-gray-800 bg-gray-950/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <button
-                onClick={() => router.push('/')}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <ArrowLeft className="h-5 w-5 text-gray-600" />
-              </button>
+            <Link href="/" className="flex items-center space-x-3">
               <div className="p-2 bg-green-600 rounded-lg">
                 <Upload className="h-6 w-6 text-white" />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">EasyShares</h1>
-            </div>
+              <h1 className="text-2xl font-bold text-green-300">EasyShares</h1>
+            </Link>
           </div>
         </div>
       </header>
@@ -172,9 +167,9 @@ export default function UploadPage() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center space-x-2">
-              <FileText className="h-6 w-6 text-green-600" />
+          <div className="bg-gray-900 rounded-xl shadow-sm border border-gray-800 p-8">
+            <h2 className="text-2xl font-bold text-green-300 mb-6 flex items-center space-x-2">
+              <FileText className="h-6 w-6 text-green-400" />
               <span>Share a File</span>
             </h2>
 
@@ -191,20 +186,20 @@ export default function UploadPage() {
 
             {/* File Upload Area */}
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-neutral-300 mb-2">
                 File (Max 10MB) *
               </label>
               <div
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
-                className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-green-400 transition-colors cursor-pointer"
+                className="border-2 border-dashed border-neutral-700 rounded-lg p-8 text-center hover:border-green-500 transition-colors cursor-pointer"
                 onClick={() => fileInputRef.current?.click()}
               >
-                <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <Upload className="h-12 w-12 text-neutral-500 mx-auto mb-4" />
                 {file ? (
                   <div>
-                    <p className="text-lg font-medium text-gray-900">{file.name}</p>
-                    <p className="text-sm text-gray-500">{formatFileSize(file.size)}</p>
+                    <p className="text-lg font-medium text-neutral-100">{file.name}</p>
+                    <p className="text-sm text-neutral-400">{formatFileSize(file.size)}</p>
                     <button
                       type="button"
                       onClick={(e) => {
@@ -214,17 +209,17 @@ export default function UploadPage() {
                           fileInputRef.current.value = '';
                         }
                       }}
-                      className="mt-2 text-sm text-red-600 hover:text-red-700"
+                      className="mt-2 text-sm text-red-500 hover:text-red-400"
                     >
                       Remove file
                     </button>
                   </div>
                 ) : (
                   <div>
-                    <p className="text-lg text-gray-600 mb-2">
+                    <p className="text-lg text-neutral-400 mb-2">
                       Drop a file here or click to browse
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-neutral-500">
                       Maximum file size: 10MB
                     </p>
                   </div>
@@ -241,7 +236,7 @@ export default function UploadPage() {
 
             {/* Title Input */}
             <div className="mb-6">
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="title" className="block text-sm font-medium text-neutral-300 mb-2">
                 Title (optional - becomes your URL)
               </label>
               <input
@@ -250,11 +245,11 @@ export default function UploadPage() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g., my-project-files"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-black placeholder-black"
+                className="w-full px-4 py-3 border border-neutral-700 bg-neutral-950 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-neutral-100 placeholder-neutral-400"
               />
               {title && (
-                <p className="mt-2 text-sm text-blue-600 font-medium">
-                  Your file will be available at: <code className="bg-blue-50 text-blue-700 px-2 py-1 rounded">
+                <p className="mt-2 text-sm text-blue-400 font-medium">
+                  Your file will be available at: <code className="bg-blue-900/50 text-blue-300 px-2 py-1 rounded">
                     /{title.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '')}
                   </code>
                 </p>
@@ -263,7 +258,7 @@ export default function UploadPage() {
 
             {/* Description Input */}
             <div className="mb-6">
-              <label htmlFor="description" className="block text-sm font-medium text-black mb-2">
+              <label htmlFor="description" className="block text-sm font-medium text-neutral-300 mb-2">
                 Description (optional)
               </label>
               <textarea
@@ -272,14 +267,13 @@ export default function UploadPage() {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Add a description for your file..."
                 rows={3}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none text-black placeholder-black"
-                style={{ color: 'black' }}
+                className="w-full px-4 py-3 border border-neutral-700 bg-neutral-950 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none text-neutral-100 placeholder-neutral-400"
               />
             </div>
 
             {/* Password Input */}
             <div className="mb-6">
-              <label htmlFor="password" className="block text-sm font-medium text-black mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-neutral-300 mb-2">
                 Password (optional - for editing/deleting only)
               </label>
               <div className="relative">
@@ -289,17 +283,17 @@ export default function UploadPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Create a secure password"
-                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-black placeholder-black"
+                className="w-full px-4 py-3 pr-12 border border-neutral-700 bg-neutral-950 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-neutral-100 placeholder-neutral-400"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-gray-500 hover:text-gray-700"
+                  className="absolute right-3 top-3 text-neutral-500 hover:text-neutral-300"
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
-              <p className="mt-2 text-sm text-black flex items-center space-x-1">
+              <p className="mt-2 text-sm text-neutral-400 flex items-center space-x-1">
                 <Lock className="h-4 w-4" />
                 <span>Only you can edit with this password. Others can only download.</span>
               </p>
@@ -308,11 +302,11 @@ export default function UploadPage() {
             {/* Upload Progress */}
             {isUploading && (
               <div className="mb-6">
-                <div className="flex justify-between text-sm text-gray-600 mb-2">
+                <div className="flex justify-between text-sm text-neutral-400 mb-2">
                   <span>Uploading...</span>
                   <span>{uploadProgress}%</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-neutral-700 rounded-full h-2">
                   <div
                     className="bg-green-600 h-2 rounded-full transition-all duration-300"
                     style={{ width: `${uploadProgress}%` }}
@@ -323,8 +317,8 @@ export default function UploadPage() {
 
             {/* Error Message */}
             {error && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-red-700">{error}</p>
+              <div className="mb-6 p-4 bg-red-900/50 border border-red-500/50 rounded-lg">
+                <p className="text-red-400">{error}</p>
               </div>
             )}
 
@@ -349,13 +343,13 @@ export default function UploadPage() {
               </button>
             ) : (
               <div className="mt-8 text-center">
-                <p className="text-green-700 font-semibold mb-2">File uploaded successfully!</p>
+                <p className="text-green-400 font-semibold mb-2">File uploaded successfully!</p>
                 <div className="flex items-center justify-center gap-2">
                   <input
                     type="text"
                     value={window.location.origin + shareUrl}
                     readOnly
-                    className="font-mono px-2 py-1 border border-gray-300 rounded bg-gray-50 text-blue-700 text-base w-2/3"
+                    className="font-mono px-2 py-1 border border-neutral-700 rounded bg-neutral-950 text-blue-400 text-base w-2/3"
                     style={{ cursor: 'pointer' }}
                     onClick={async (e) => {
                       e.currentTarget.select();
@@ -391,16 +385,31 @@ export default function UploadPage() {
                       setCopied(success);
                       setTimeout(() => setCopied(false), 2000);
                     }}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-sm font-semibold"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg font-semibold transition-colors flex items-center space-x-2"
                   >
-                    {copied ? 'Copied!' : 'Copy Link'}
+                    {copied ? (
+                      <>
+                        <Check className="h-5 w-5" />
+                        <span>Link copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-5 w-5" />
+                        <span>Copy link</span>
+                      </>
+                    )}
                   </button>
                 </div>
+                <p className="mt-4 text-sm text-gray-500">
+                  Share this link with others to allow them to download the file.
+                </p>
               </div>
             )}
           </div>
         </div>
       </main>
+
+      {/* Footer */}
       <Footer />
     </div>
   );

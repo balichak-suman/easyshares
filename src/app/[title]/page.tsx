@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Editor from '@monaco-editor/react';
 import { Copy, Edit3, Eye, Code, Check, AlertTriangle, Download, FileText, Save } from 'lucide-react';
 import Footer from '@/components/Footer';
+import Link from 'next/link';
 
 interface CodeShare {
   id: string;
@@ -299,12 +300,12 @@ export default function UnifiedSharePage() {
         <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
+              <Link href="/" className="flex items-center space-x-3">
                 <div className="p-2 bg-blue-600 rounded-lg">
                   <Code className="h-6 w-6 text-white" />
                 </div>
                 <h1 className="text-2xl font-bold text-gray-900">EasyShares</h1>
-              </div>
+              </Link>
               <div className="text-sm text-gray-600">
                 Code Share
               </div>
@@ -437,12 +438,12 @@ export default function UnifiedSharePage() {
         <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
+              <Link href="/" className="flex items-center space-x-3">
                 <div className="p-2 bg-green-600 rounded-lg">
                   <FileText className="h-6 w-6 text-white" />
                 </div>
                 <h1 className="text-2xl font-bold text-gray-900">EasyShares</h1>
-              </div>
+              </Link>
               <div className="text-sm text-gray-600">
                 File Share
               </div>

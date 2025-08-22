@@ -1,10 +1,11 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Editor from '@monaco-editor/react';
-import { Copy, Code, Edit3, Save, Lock, Check, AlertTriangle, Eye, EyeOff, ArrowLeft, Share2 } from 'lucide-react';
 import Footer from '@/components/Footer';
+import { Copy, Save, Check, ArrowLeft, Code, AlertTriangle } from 'lucide-react';
+import Link from 'next/link';
 
 export default function CreatePage() {
   const [code, setCode] = useState('// Welcome to CodeShare!\n// Write your code here...\n\nfunction hello() {\n    console.log("Hello, World!");\n}');
@@ -18,17 +19,14 @@ export default function CreatePage() {
   const [isSaved, setIsSaved] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
   const [copied, setCopied] = useState(false);
-  
+  // State for code execution
+  const [isRunning, setIsRunning] = useState(false);
+  const [runOutput, setRunOutput] = useState('');
+  const [runError, setRunError] = useState<string | null>(null);
+
   const router = useRouter();
   const params = useParams();
   const shareId = params.id as string;
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && shareId) {
-      const finalSlug = isSaved && title ? createSlugFromTitle(title) : shareId;
-      setShareUrl(`${window.location.origin}/${finalSlug}`);
-    }
-  }, [shareId, isSaved, title]);
 
   const createSlugFromTitle = (titleText: string) => {
     return titleText
@@ -39,81 +37,73 @@ export default function CreatePage() {
       .trim();
   };
 
+  const checkTitleAvailability = useCallback(async (slug: string) => {
+    setTitleChecking(true);
+    setTitleAvailable(null);
+    try {
+      const response = await fetch(`/api/codeshare/check-slug?slug=${slug}`);
+      const data = await response.json();
+      setTitleAvailable(data.available);
+      if (!data.available) {
+        setTitleError('This title creates a URL that is already taken');
+      }
+    } catch (error) {
+      console.error('Error checking title availability:', error);
+      setTitleError('Could not verify title. Please try again.');
+    } finally {
+      setTitleChecking(false);
+    }
+  }, []);
+
+  const handleTitleChange = (value: string) => {
+    setTitle(value);
+    const validationError = validateTitle(value);
+    setTitleError(validationError);
+
+    if (!value.trim()) {
+      setTitleAvailable(null);
+      return;
+    }
+
+    if (!validationError) {
+      const slug = createSlugFromTitle(value);
+      if (slug.length >= 3) {
+        checkTitleAvailability(slug);
+      }
+    }
+  };
+
   const validateTitle = (titleText: string) => {
     if (!titleText) return '';
-    
+
     const slug = createSlugFromTitle(titleText);
-    
+
     // Check minimum length
     if (slug.length < 3) {
       return 'Title must be at least 3 characters long when converted to URL';
     }
-    
+
     // Check maximum length
     if (slug.length > 50) {
       return 'Title is too long (max 50 characters in URL format)';
     }
-    
+
     return '';
   };
 
-  const handleTitleChange = async (value: string) => {
-    setTitle(value);
-    
-    if (!value.trim()) {
-      setTitleError('');
-      setTitleAvailable(null);
-      return;
-    }
-
-    const validationError = validateTitle(value);
-    setTitleError(validationError);
-    
-    if (!validationError) {
-      const slug = createSlugFromTitle(value);
-      
-      if (slug.length >= 3) {
-        setTitleChecking(true);
-        setTitleAvailable(null);
-        
-        try {
-          const response = await fetch(`/api/codeshare/check-slug?slug=${slug}`);
-          const data = await response.json();
-          setTitleAvailable(data.available);
-          
-          if (!data.available) {
-            setTitleError('This title creates a URL that is already taken');
-          }
-        } catch (error) {
-          console.error('Error checking title availability:', error);
-        } finally {
-          setTitleChecking(false);
-        }
-      }
-    } else {
-      setTitleAvailable(null);
-    }
-  };
-
   const saveCodeShare = async () => {
-    // Check for title validation errors only if title is provided
     if (title.trim() && titleError) {
       alert('Please fix the title error before saving');
       return;
     }
-
     if (title.trim() && titleAvailable === false) {
       alert('This title creates a URL that is already taken. Please choose a different title.');
       return;
     }
-
     setIsSaving(true);
-    
     try {
-      // Use title-based slug if title exists, otherwise use random shareId
       const finalId = title.trim() ? createSlugFromTitle(title) : shareId;
       const finalTitle = title.trim() || 'Untitled EasyShare';
-      
       const response = await fetch('/api/codeshare', {
         method: 'POST',
         headers: {
@@ -128,9 +118,10 @@ export default function CreatePage() {
           isCustomSlug: !!title.trim(),
         }),
       });
-
       if (response.ok) {
         setIsSaved(true);
+        const finalSlug = isSaved && title ? createSlugFromTitle(title) : shareId;
+        setShareUrl(`${window.location.origin}/${finalSlug}`);
       } else if (response.status === 409) {
         alert('This title creates a URL that is already taken. Please choose a different title.');
         setTitleAvailable(false);
@@ -146,11 +137,9 @@ export default function CreatePage() {
 
   const copyToClipboard = async () => {
     try {
-      // Check if clipboard API is available
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(shareUrl);
       } else {
-        // Fallback for older browsers or non-secure contexts
         const textArea = document.createElement('textarea');
         textArea.value = shareUrl;
         textArea.style.position = 'fixed';
@@ -166,7 +155,6 @@ export default function CreatePage() {
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Failed to copy: ', err);
-      // Show a fallback message to user
       alert(`Copy this URL manually: ${shareUrl}`);
     }
   };
@@ -189,49 +177,50 @@ export default function CreatePage() {
     { value: 'markdown', label: 'Markdown' },
   ];
 
+  useEffect(() => {
+    if (typeof window !== 'undefined' && shareId) {
+      const finalSlug = isSaved && title ? createSlugFromTitle(title) : shareId;
+      setShareUrl(`${window.location.origin}/${finalSlug}`);
+    }
+  }, [shareId, isSaved, title]);
+
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950 font-sans text-neutral-100">
       {/* Header */}
-      <header className="border-b border-gray-200 bg-white">
+      <header className="border-b border-neutral-800 bg-neutral-950/80 backdrop-blur-sm sticky top-0 z-20">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
               <button
                 onClick={() => router.push('/')}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 hover:bg-neutral-800 rounded-lg transition-colors"
+                aria-label="Back to Home"
               >
-                <ArrowLeft className="h-5 w-5 text-gray-600" />
+                <ArrowLeft className="h-5 w-5 text-neutral-300" />
               </button>
-              <div className="flex items-center space-x-3">
+              <Link href="/" className="flex items-center space-x-2">
                 <div className="p-2 bg-blue-600 rounded-lg">
                   <Code className="h-6 w-6 text-white" />
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900">EasyShares</h1>
-              </div>
+                <h1 className="text-2xl font-bold text-blue-300">Create Share</h1>
+              </Link>
             </div>
-            
             <div className="flex items-center space-x-4">
-              {isSaved && (
-                <div className="flex items-center space-x-2 text-green-600">
-                  <Check className="h-5 w-5" />
-                  <span className="text-sm font-medium">Saved</span>
-                </div>
-              )}
-              
               <button
                 onClick={saveCodeShare}
-                disabled={isSaving}
-                className="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                disabled={isSaving || !!titleError || (title.trim() !== '' && titleAvailable === false)}
+                className="inline-flex items-center space-x-2 px-6 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-lg hover:shadow-blue-500/30 transition-all duration-300 disabled:bg-neutral-700 disabled:cursor-not-allowed disabled:shadow-none"
               >
                 {isSaving ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                     <span>Saving...</span>
                   </>
                 ) : (
                   <>
-                    <Save className="h-4 w-4" />
-                    <span>Save</span>
+                    <Save className="h-5 w-5" />
+                    <span>Save & Share</span>
                   </>
                 )}
               </button>
@@ -240,169 +229,131 @@ export default function CreatePage() {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-6">
-        <div className="grid lg:grid-cols-4 gap-6">
-          {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Share Settings */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
-                <Share2 className="h-5 w-5 text-blue-600" />
-                <span>Share Settings</span>
-              </h3>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Title (becomes your URL)
-                  </label>
-                  <div className="relative">
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-8">
+        {isSaved ? (
+          <div className="max-w-3xl mx-auto bg-neutral-900 rounded-xl shadow-2xl border border-neutral-800 p-8 text-center animate-fade-in-up">
+            <h2 className="text-3xl font-bold text-blue-300 mb-4">Share Created!</h2>
+            <p className="text-neutral-300 mb-6">Your code is now saved and ready to be shared.</p>
+            <div className="flex items-center space-x-2">
+              <input
+                type="text"
+                value={shareUrl}
+                readOnly
+                className="w-full px-4 py-2 rounded-lg border border-neutral-700 bg-neutral-950 text-blue-300 font-mono text-sm"
+              />
+              <button
+                onClick={copyToClipboard}
+                className="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                aria-label="Copy Share URL"
+              >
+                {copied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
+              </button>
+            </div>
+             <p className="text-xs text-neutral-500 mt-2">
+                {password ? "This share is password-protected for editing." : "Anyone with the link can view. Editing is locked."}
+            </p>
+            <button
+              onClick={() => router.push('/')}
+              className="mt-8 inline-flex items-center space-x-2 px-6 py-2 rounded-lg bg-neutral-700 hover:bg-neutral-600 text-white font-semibold transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Create Another</span>
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Column: Settings */}
+            <div className="lg:col-span-1 space-y-6">
+              <div className="bg-neutral-900 rounded-xl shadow-lg border border-neutral-800 p-6">
+                <h3 className="text-lg font-semibold text-blue-300 mb-4">Settings</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="language-select" className="block text-sm font-medium text-neutral-300 mb-2">Language</label>
+                    <select
+                      id="language-select"
+                      value={language}
+                      onChange={e => setLanguage(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-neutral-700 bg-neutral-950 text-neutral-100 focus:ring-2 focus:ring-blue-500 transition"
+                    >
+                      {languages.map(lang => (
+                        <option key={lang.value} value={lang.value}>{lang.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="password-input" className="block text-sm font-medium text-neutral-300 mb-2">Edit Password (Optional)</label>
                     <input
+                      id="password-input"
+                      type="password"
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      placeholder="Leave empty for view-only"
+                      className="w-full px-3 py-2 rounded-lg border border-neutral-700 bg-neutral-950 text-neutral-100 focus:ring-2 focus:ring-blue-500 transition"
+                    />
+                     <p className="text-xs text-neutral-500 mt-1">Set a password to be able to edit this share later.</p>
+                  </div>
+                </div>
+              </div>
+               <div className="bg-neutral-900 rounded-xl shadow-lg border border-neutral-800 p-6">
+                  <h3 className="text-lg font-semibold text-blue-300 mb-4">Custom URL (Optional)</h3>
+                   <input
                       type="text"
                       value={title}
-                      onChange={(e) => handleTitleChange(e.target.value)}
-                      placeholder="my-awesome-code"
-                      className={`w-full px-3 py-2 pr-8 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 ${
-                        titleError ? 'border-red-300' : 
-                        titleAvailable === true ? 'border-green-300' :
-                        'border-gray-300'
-                      }`}
+                      onChange={e => handleTitleChange(e.target.value)}
+                      placeholder="e.g., 'My Awesome Script'"
+                      className="w-full px-3 py-2 rounded-lg border border-neutral-700 bg-neutral-950 text-neutral-100 focus:ring-2 focus:ring-blue-500 transition"
                     />
-                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
-                      {titleChecking && (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                      )}
-                      {!titleChecking && titleAvailable === true && (
-                        <Check className="h-4 w-4 text-green-600" />
-                      )}
-                      {!titleChecking && titleAvailable === false && (
-                        <span className="text-red-600 text-xs">✕</span>
-                      )}
+                    <div className="h-4 mt-2 text-sm">
+                      {titleChecking && <p className="text-blue-400">Checking...</p>}
+                      {titleError && <p className="text-red-400">{titleError}</p>}
+                      {titleAvailable === true && <p className="text-green-400">Title is available!</p>}
+                      {titleAvailable === false && <p className="text-red-400">This title is already taken.</p>}
                     </div>
-                  </div>
-                  {titleError && (
-                    <p className="text-xs text-red-600 mt-1">{titleError}</p>
-                  )}
-                  {!titleError && titleAvailable === true && (
-                    <p className="text-xs text-green-600 mt-1">✓ This URL is available!</p>
-                  )}
-                  <p className="text-sm text-blue-600 font-medium mt-1">
-                    {title && typeof window !== 'undefined' ? (
-                      <>
-                        Your code will be available at: <code className="bg-blue-50 text-blue-700 px-2 py-1 rounded">
-                          {window.location.host}/{createSlugFromTitle(title)}
-                        </code>
-                      </>
-                    ) : (
-                      'Leave empty for random URL'
-                    )}
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Language
-                  </label>
-                  <select
-                    value={language}
-                    onChange={(e) => setLanguage(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-                  >
-                    {languages.map((lang) => (
-                      <option key={lang.value} value={lang.value}>
-                        {lang.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center space-x-2">
-                    <Lock className="h-4 w-4 text-gray-500" />
-                    <span>Edit Password (Optional)</span>
-                  </label>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Leave empty for public code (anyone can view)"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Set a password to control editing, or leave empty for view-only public sharing
-                  </p>
-                </div>
-              </div>
+               </div>
             </div>
 
-            {/* Share URL */}
-            {isSaved && (
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
-                  <Eye className="h-5 w-5 text-green-600" />
-                  <span>Share URL</span>
-                </h3>
-                
-                <div className="space-y-3">
-                  <div className="flex space-x-2">
-                    <input
-                      type="text"
-                      value={shareUrl}
-                      readOnly
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-blue-50 text-blue-700 font-medium text-sm"
-                    />
-                    <button
-                      onClick={copyToClipboard}
-                      className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+            {/* Right Column: Editor */}
+            <div className="lg:col-span-2">
+              <div className="bg-neutral-900 rounded-xl shadow-2xl border border-neutral-800 overflow-hidden">
+                <div className="border-b border-neutral-800 px-4 py-2 bg-neutral-800/50 flex justify-between items-center">
+                   <p className="text-sm text-neutral-300 font-mono">{title ? createSlugFromTitle(title) : shareId}</p>
+                   <button
+                      onClick={() => {
+                        if (typeof window !== 'undefined') {
+                          window.open(`/execute?code=${encodeURIComponent(code)}&lang=${encodeURIComponent(language)}`, '_blank');
+                        }
+                      }}
+                      className="inline-flex items-center space-x-1 text-xs px-2 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm transition-all duration-300"
                     >
-                      {copied ? (
-                        <Check className="h-4 w-4" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
+                      <Code className="h-3 w-3" />
+                      <span>Compile</span>
                     </button>
-                  </div>
-                  
-                  <p className="text-xs text-gray-500">
-                    Share this URL with others. They can view your code but only you can edit it.
-                  </p>
                 </div>
-              </div>
-            )}
-          </div>
-
-          {/* Editor */}
-          <div className="lg:col-span-3">
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-              <div className="border-b border-gray-200 px-4 py-3 bg-gray-50">
-                <h2 className="text-lg font-semibold text-gray-900">
-                  {title || 'Untitled EasyShare'}
-                </h2>
-              </div>
-              
-              <div className="h-[600px]">
-                <Editor
-                  height="100%"
-                  language={language}
-                  value={code}
-                  onChange={(value) => setCode(value || '')}
-                  theme="vs-light"
-                  options={{
-                    minimap: { enabled: false },
-                    fontSize: 14,
-                    lineNumbers: 'on',
-                    scrollBeyondLastLine: false,
-                    automaticLayout: true,
-                    tabSize: 2,
-                    wordWrap: 'on',
-                  }}
-                />
+                <div className="h-[600px]">
+                  <Editor
+                    height="100%"
+                    language={language}
+                    value={code}
+                    onChange={value => setCode(value || '')}
+                    theme="vs-dark"
+                    options={{
+                      minimap: { enabled: false },
+                      fontSize: 14,
+                      lineNumbers: 'on',
+                      scrollBeyondLastLine: false,
+                      automaticLayout: true,
+                      tabSize: 2,
+                      wordWrap: 'on',
+                    }}
+                  />
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <Footer />
-      </div>
+        )}
+      </main>
+      <Footer />
     </div>
   );
 }
