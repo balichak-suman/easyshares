@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Editor from '@monaco-editor/react';
 import { Copy, Edit3, Eye, Code, Check, AlertTriangle, Download, FileText, Save } from 'lucide-react';
+import Footer from '@/components/Footer';
 
 interface CodeShare {
   id: string;
@@ -423,6 +424,7 @@ export default function UnifiedSharePage() {
             </div>
           </div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -524,6 +526,7 @@ export default function UnifiedSharePage() {
             </div>
           </div>
         </div>
+        <Footer />
       </div>
     );
   }

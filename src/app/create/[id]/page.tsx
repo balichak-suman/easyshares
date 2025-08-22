@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Editor from '@monaco-editor/react';
-import { Copy, Save, Share2, Lock, Eye, Code, ArrowLeft, Check } from 'lucide-react';
+import { Copy, Code, Edit3, Save, Lock, Check, AlertTriangle, Eye, EyeOff, ArrowLeft, Share2 } from 'lucide-react';
+import Footer from '@/components/Footer';
 
 export default function CreatePage() {
   const [code, setCode] = useState('// Welcome to CodeShare!\n// Write your code here...\n\nfunction hello() {\n    console.log("Hello, World!");\n}');
@@ -205,7 +206,7 @@ export default function CreatePage() {
                 <div className="p-2 bg-blue-600 rounded-lg">
                   <Code className="h-6 w-6 text-white" />
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900">ShareIt</h1>
+                <h1 className="text-2xl font-bold text-gray-900">EasyShares</h1>
               </div>
             </div>
             
@@ -400,6 +401,7 @@ export default function CreatePage() {
             </div>
           </div>
         </div>
+        <Footer />
       </div>
     </div>
   );

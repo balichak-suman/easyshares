@@ -2,7 +2,8 @@
 
 import { useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { Upload, ArrowLeft, Lock, Eye, EyeOff, Share2, FileText, AlertCircle } from 'lucide-react';
+import { Upload, ArrowLeft, Lock, Eye, EyeOff, Share2, FileText, AlertCircle, Copy, Check } from 'lucide-react';
+import Footer from '@/components/Footer';
 
 export default function UploadPage() {
   const params = useParams();
@@ -162,7 +163,7 @@ export default function UploadPage() {
               <div className="p-2 bg-green-600 rounded-lg">
                 <Upload className="h-6 w-6 text-white" />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">ShareIt</h1>
+              <h1 className="text-2xl font-bold text-gray-900">EasyShares</h1>
             </div>
           </div>
         </div>
@@ -400,6 +401,7 @@ export default function UploadPage() {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

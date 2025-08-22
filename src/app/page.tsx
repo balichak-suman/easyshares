@@ -199,7 +199,7 @@ export default function Home() {
       <footer className="border-t border-gray-200 bg-white/80 backdrop-blur-sm mt-16">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center text-gray-600">
-            <p>&copy; 2025 ShareIt. Created by <span className="font-semibold text-blue-600">Balichak Suman</span></p>
+            <p>&copy; 2025 EasyShares. Created by <span className="font-semibold text-blue-600">Balichak Suman</span></p>
             <p className="text-sm mt-1">Built with Next.js, TypeScript & Monaco Editor</p>
           </div>
         </div>
