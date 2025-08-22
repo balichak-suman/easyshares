@@ -90,9 +90,9 @@ export default function ExecutePage() {
       </header>
 
       {/* Main Content (Editor and I/O) */}
-      <main className="flex-grow flex flex-col overflow-hidden">
+      <main className="flex-grow grid grid-rows-[1fr,auto] overflow-hidden">
         {/* Editor */}
-        <div className="flex-grow relative">
+        <div className="relative overflow-hidden">
           <MonacoEditor
             language={selectedLanguage?.monaco || 'python'}
             value={code}
