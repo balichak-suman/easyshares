@@ -17,6 +17,8 @@ export default function UploadPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState('');
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const shareId = Array.isArray(params.id) ? params.id[0] : params.id;
 
@@ -34,10 +36,7 @@ export default function UploadPage() {
     setFile(selectedFile);
     setError('');
     
-    // Auto-fill title if empty
-    if (!title) {
-      setTitle(selectedFile.name);
-    }
+    // Do not auto-fill title. Require user to enter it.
   };
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
@@ -55,9 +54,7 @@ export default function UploadPage() {
     setFile(droppedFile);
     setError('');
     
-    if (!title) {
-      setTitle(droppedFile.name);
-    }
+    // Do not auto-fill title. Require user to enter it.
   };
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
@@ -73,9 +70,14 @@ export default function UploadPage() {
   };
 
   const handleUpload = async () => {
-    if (!file || !title.trim() || !password.trim()) {
-      setError('Please fill in all required fields');
+    if (!file) {
+      setError('Please select a file to upload');
       return;
+    }
+    let finalTitle = title.trim();
+    if (!finalTitle) {
+      // Generate a random code if no title entered
+      finalTitle = Math.random().toString(36).substring(2, 10);
     }
 
     setIsUploading(true);
@@ -112,7 +114,7 @@ export default function UploadPage() {
         },
         body: JSON.stringify({
           id: shareId,
-          title: title.trim(),
+          title: finalTitle,
           description: description.trim(),
           password,
           fileName: file.name,
@@ -130,10 +132,11 @@ export default function UploadPage() {
         throw new Error(errorData.error || 'Upload failed');
       }
 
-      // Redirect to the file view page
-      setTimeout(() => {
-        router.push(`/${title.trim().toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '')}`);
-      }, 500);
+      // Show share link and copy button
+      const data = await response.json();
+      if (data && data.title) {
+        setShareUrl(`/${data.title}`);
+      }
     } catch (error) {
       console.error('Upload error:', error);
       setError(error instanceof Error ? error.message : 'Upload failed');
@@ -238,7 +241,7 @@ export default function UploadPage() {
             {/* Title Input */}
             <div className="mb-6">
               <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-                Title (becomes your URL) *
+                Title (optional - becomes your URL)
               </label>
               <input
                 type="text"
@@ -246,11 +249,11 @@ export default function UploadPage() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g., my-project-files"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-black placeholder-black"
               />
               {title && (
-                <p className="mt-2 text-sm text-gray-500">
-                  Your file will be available at: <code className="bg-gray-100 px-1 rounded">
+                <p className="mt-2 text-sm text-blue-600 font-medium">
+                  Your file will be available at: <code className="bg-blue-50 text-blue-700 px-2 py-1 rounded">
                     /{title.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '')}
                   </code>
                 </p>
@@ -259,7 +262,7 @@ export default function UploadPage() {
 
             {/* Description Input */}
             <div className="mb-6">
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="description" className="block text-sm font-medium text-black mb-2">
                 Description (optional)
               </label>
               <textarea
@@ -268,23 +271,24 @@ export default function UploadPage() {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Add a description for your file..."
                 rows={3}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none text-black placeholder-black"
+                style={{ color: 'black' }}
               />
             </div>
 
             {/* Password Input */}
             <div className="mb-6">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Password (for editing only) *
+              <label htmlFor="password" className="block text-sm font-medium text-black mb-2">
+                Password (optional - for editing/deleting only)
               </label>
               <div className="relative">
                 <input
-                  type={showPassword ? 'text' : 'password'}
-                  id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Create a secure password"
-                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                type={showPassword ? 'text' : 'password'}
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Create a secure password"
+                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-black placeholder-black"
                 />
                 <button
                   type="button"
@@ -294,7 +298,7 @@ export default function UploadPage() {
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
-              <p className="mt-2 text-sm text-gray-500 flex items-center space-x-1">
+              <p className="mt-2 text-sm text-black flex items-center space-x-1">
                 <Lock className="h-4 w-4" />
                 <span>Only you can edit with this password. Others can only download.</span>
               </p>
@@ -324,23 +328,75 @@ export default function UploadPage() {
             )}
 
             {/* Upload Button */}
-            <button
-              onClick={handleUpload}
-              disabled={!file || !title.trim() || !password.trim() || isUploading}
-              className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2"
-            >
-              {isUploading ? (
-                <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  <span>Uploading...</span>
-                </>
-              ) : (
-                <>
-                  <Share2 className="h-5 w-5" />
-                  <span>Upload & Share</span>
-                </>
-              )}
-            </button>
+            {!shareUrl ? (
+              <button
+                onClick={handleUpload}
+                disabled={!file || isUploading}
+                className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2"
+              >
+                {isUploading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <span>Uploading...</span>
+                  </>
+                ) : (
+                  <>
+                    <Share2 className="h-5 w-5" />
+                    <span>Upload & Share</span>
+                  </>
+                )}
+              </button>
+            ) : (
+              <div className="mt-8 text-center">
+                <p className="text-green-700 font-semibold mb-2">File uploaded successfully!</p>
+                <div className="flex items-center justify-center gap-2">
+                  <input
+                    type="text"
+                    value={window.location.origin + shareUrl}
+                    readOnly
+                    className="font-mono px-2 py-1 border border-gray-300 rounded bg-gray-50 text-blue-700 text-base w-2/3"
+                    style={{ cursor: 'pointer' }}
+                    onClick={async (e) => {
+                      e.currentTarget.select();
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const textToCopy = (typeof window !== 'undefined' ? window.location.origin : '') + shareUrl;
+                      let success = false;
+                      try {
+                        if (
+                          typeof window !== 'undefined' &&
+                          typeof navigator !== 'undefined' &&
+                          navigator.clipboard &&
+                          typeof navigator.clipboard.writeText === 'function'
+                        ) {
+                          await navigator.clipboard.writeText(textToCopy);
+                          success = true;
+                        } else if (typeof window !== 'undefined') {
+                          // Fallback for older browsers
+                          const input = document.createElement('input');
+                          input.value = textToCopy;
+                          document.body.appendChild(input);
+                          input.select();
+                          document.execCommand('copy');
+                          document.body.removeChild(input);
+                          success = true;
+                        }
+                      } catch {
+                        success = false;
+                      }
+                      setCopied(success);
+                      setTimeout(() => setCopied(false), 2000);
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-sm font-semibold"
+                  >
+                    {copied ? 'Copied!' : 'Copy Link'}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </main>

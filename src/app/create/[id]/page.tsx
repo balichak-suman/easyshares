@@ -95,12 +95,7 @@ export default function CreatePage() {
   };
 
   const saveCodeShare = async () => {
-    if (!password.trim()) {
-      alert('Please set a password to protect your code share');
-      return;
-    }
-
-    // Check for title validation errors
+    // Check for title validation errors only if title is provided
     if (title.trim() && titleError) {
       alert('Please fix the title error before saving');
       return;
@@ -150,11 +145,28 @@ export default function CreatePage() {
 
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(shareUrl);
+      // Check if clipboard API is available
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(shareUrl);
+      } else {
+        // Fallback for older browsers or non-secure contexts
+        const textArea = document.createElement('textarea');
+        textArea.value = shareUrl;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+      }
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Failed to copy: ', err);
+      // Show a fallback message to user
+      alert(`Copy this URL manually: ${shareUrl}`);
     }
   };
 
@@ -249,7 +261,7 @@ export default function CreatePage() {
                       value={title}
                       onChange={(e) => handleTitleChange(e.target.value)}
                       placeholder="my-awesome-code"
-                      className={`w-full px-3 py-2 pr-8 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                      className={`w-full px-3 py-2 pr-8 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 ${
                         titleError ? 'border-red-300' : 
                         titleAvailable === true ? 'border-green-300' :
                         'border-gray-300'
@@ -273,8 +285,16 @@ export default function CreatePage() {
                   {!titleError && titleAvailable === true && (
                     <p className="text-xs text-green-600 mt-1">✓ This URL is available!</p>
                   )}
-                  <p className="text-xs text-gray-500 mt-1">
-                    {title && typeof window !== 'undefined' ? `URL: ${window.location.host}/${createSlugFromTitle(title)}` : 'Leave empty for random URL'}
+                  <p className="text-sm text-blue-600 font-medium mt-1">
+                    {title && typeof window !== 'undefined' ? (
+                      <>
+                        Your code will be available at: <code className="bg-blue-50 text-blue-700 px-2 py-1 rounded">
+                          {window.location.host}/{createSlugFromTitle(title)}
+                        </code>
+                      </>
+                    ) : (
+                      'Leave empty for random URL'
+                    )}
                   </p>
                 </div>
 
@@ -285,7 +305,7 @@ export default function CreatePage() {
                   <select
                     value={language}
                     onChange={(e) => setLanguage(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                   >
                     {languages.map((lang) => (
                       <option key={lang.value} value={lang.value}>
@@ -297,18 +317,18 @@ export default function CreatePage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center space-x-2">
-                    <Lock className="h-4 w-4 text-red-500" />
-                    <span>Edit Password (Required)</span>
+                    <Lock className="h-4 w-4 text-gray-500" />
+                    <span>Edit Password (Optional)</span>
                   </label>
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Set a password to edit this code"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Leave empty for public code (anyone can view)"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Only you will be able to edit with this password
+                    Set a password to control editing, or leave empty for view-only public sharing
                   </p>
                 </div>
               </div>
@@ -328,7 +348,7 @@ export default function CreatePage() {
                       type="text"
                       value={shareUrl}
                       readOnly
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-blue-50 text-blue-700 font-medium text-sm"
                     />
                     <button
                       onClick={copyToClipboard}

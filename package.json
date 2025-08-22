@@ -12,6 +12,7 @@
     "@monaco-editor/react": "^4.7.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/uuid": "^10.0.0",
+    "@vercel/kv": "^3.0.0",
     "bcryptjs": "^3.0.2",
     "lucide-react": "^0.540.0",
     "next": "15.5.0",

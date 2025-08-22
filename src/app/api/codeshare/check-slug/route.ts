@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dataStore from '@/lib/productionDataStore';
+import { getCodeShare, getFileShare } from '@/lib/database';
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,7 +13,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const isAvailable = !dataStore.exists(slug);
+    // Check if slug exists in either code shares or file shares
+    const codeShare = await getCodeShare(slug);
+    const fileShare = await getFileShare(slug);
+    
+    const isAvailable = !codeShare && !fileShare;
 
     return NextResponse.json({ 
       available: isAvailable,

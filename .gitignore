@@ -26,6 +26,7 @@
 
 # data storage
 codeshare-data.json
+data/
 
 # debug
 npm-debug.log*
