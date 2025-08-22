@@ -71,11 +71,16 @@ export async function POST(request: NextRequest) {
     // Create URL-friendly slug from title
     const slug = title ? title.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') : id;
     
-    // Check if slug already exists
-    const existingShare = await getCodeShare(slug);
-    if (existingShare) {
+    // Check if slug is used in code or file shares and not expired
+    const existingCodeShare = await getCodeShare(slug);
+    const existingFileShare = await (await import('@/lib/database')).getFileShare(slug);
+    const now = new Date();
+    if (
+      (existingCodeShare && new Date(existingCodeShare.expiresAt) > now) ||
+      (existingFileShare && new Date(existingFileShare.expiresAt) > now)
+    ) {
       return NextResponse.json(
-        { error: 'A code share with this title already exists. Please choose a different title.' },
+        { error: 'This title is already in use for an active share. Please choose a different title or wait for the previous one to expire.' },
         { status: 409 }
       );
     }
