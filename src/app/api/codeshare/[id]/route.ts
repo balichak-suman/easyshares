@@ -19,7 +19,7 @@ export async function GET(
     }
 
     // Return public data without password hash
-    const { passwordHash: _, ...publicData } = codeShare;
+    const { passwordHash, ...publicData } = codeShare;
     return NextResponse.json(publicData);
 
   } catch (error) {
@@ -65,7 +65,7 @@ export async function PUT(
     const updatedCodeShare = await dataStore.get(id);
 
     // Return updated data without password hash
-    const { passwordHash: _, ...publicData } = updatedCodeShare!;
+    const { passwordHash, ...publicData } = updatedCodeShare!;
     return NextResponse.json(publicData);
 
   } catch (error) {

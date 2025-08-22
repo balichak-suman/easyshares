@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Editor from '@monaco-editor/react';
-import { Copy, Edit3, Eye, Code, Lock, Check, AlertTriangle, Download, FileText, Trash2, Calendar, User, Save } from 'lucide-react';
+import { Copy, Edit3, Eye, Code, Check, AlertTriangle, Download, FileText, Save } from 'lucide-react';
 
 interface CodeShare {
   id: string;
@@ -43,16 +42,11 @@ export default function UnifiedSharePage() {
   const [saving, setSaving] = useState(false);
   const [authError, setAuthError] = useState('');
   const [downloading, setDownloading] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   
   const params = useParams();
   const shareTitle = params.title as string;
 
-  useEffect(() => {
-    fetchShare();
-  }, [shareTitle]);
-
-  const fetchShare = async () => {
+  const fetchShare = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -99,7 +93,11 @@ export default function UnifiedSharePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [shareTitle]);
+
+  useEffect(() => {
+    fetchShare();
+  }, [fetchShare]);
 
   const copyToClipboard = async () => {
     let success = false;
@@ -127,7 +125,7 @@ export default function UnifiedSharePage() {
         document.body.removeChild(input);
         success = true;
       }
-    } catch (err) {
+    } catch {
       success = false;
       console.error('Failed to copy to clipboard');
     }
@@ -171,7 +169,7 @@ export default function UnifiedSharePage() {
         const errorData = await response.json();
         setAuthError(errorData.error || 'Failed to save changes');
       }
-    } catch (err) {
+    } catch {
       setAuthError('Failed to save changes');
     } finally {
       setSaving(false);
@@ -236,50 +234,10 @@ export default function UnifiedSharePage() {
         const errorData = await response.json();
         setAuthError(errorData.error || 'Download failed');
       }
-    } catch (err) {
+    } catch {
       setAuthError('Download failed');
     } finally {
       setDownloading(false);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!password.trim()) {
-      setAuthError('Password is required to delete');
-      return;
-    }
-
-    if (!confirm('Are you sure you want to delete this share? This action cannot be undone.')) {
-      return;
-    }
-
-    setDeleting(true);
-    setAuthError('');
-
-    try {
-      const endpoint = shareType === 'code' ? '/api/codeshare' : '/api/files';
-      const response = await fetch(endpoint, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: shareTitle,
-          password,
-        }),
-      });
-
-      if (response.ok) {
-        // Redirect to home page
-        window.location.href = '/';
-      } else if (response.status === 401) {
-        setAuthError('Invalid password');
-      } else {
-        const errorData = await response.json();
-        setAuthError(errorData.error || 'Delete failed');
-      }
-    } catch (err) {
-      setAuthError('Delete failed');
-    } finally {
-      setDeleting(false);
     }
   };
 

@@ -1,11 +1,9 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { Shield, Code, Share, Zap, Edit3, Lock, Share2, Eye, FileText, Upload } from 'lucide-react';
+import { Shield, Code, Edit3, Lock, Share2, Eye, FileText, Upload } from 'lucide-react';
 import { useState } from 'react';
 
 export default function Home() {
-  const router = useRouter();
   const [navigating, setNavigating] = useState(false);
 
   return (

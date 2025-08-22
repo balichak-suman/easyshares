@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { 
-  getFileShares, 
   getFileShare, 
   addFileShare, 
-  updateFileShare, 
   deleteFileShare,
   cleanupExpiredShares,
   type FileShare 
@@ -43,7 +41,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Return share metadata without content and password hash
-    const { content, passwordHash, ...publicData } = share;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { content: _content, passwordHash: _passwordHash, ...publicData } = share;
     return NextResponse.json(publicData);
   } catch (error) {
     console.error('Error retrieving file share:', error);
@@ -115,7 +114,8 @@ export async function POST(request: NextRequest) {
     await addFileShare(fileShare);
 
     // Return success without the content and password hash
-    const { content: _, passwordHash: __, ...publicData } = fileShare;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { content: _content2, passwordHash: _passwordHash2, ...publicData } = fileShare;
     return NextResponse.json(publicData);
   } catch (error) {
     console.error('Error creating file share:', error);

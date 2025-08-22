@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { 
-  getCodeShares, 
   getCodeShare, 
   addCodeShare, 
   updateCodeShare, 
@@ -104,7 +103,8 @@ export async function POST(request: NextRequest) {
     await addCodeShare(codeShare);
 
     // Return success without the password hash
-    const { passwordHash: _, ...publicData } = codeShare;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { passwordHash: _passwordHash, ...publicData } = codeShare;
     return NextResponse.json(publicData);
   } catch (error) {
     console.error('Error creating code share:', error);

@@ -136,7 +136,7 @@ export default function CreatePage() {
       } else {
         throw new Error('Failed to save');
       }
-    } catch (error) {
+    } catch {
       alert('Failed to save code share. Please try again.');
     } finally {
       setIsSaving(false);
