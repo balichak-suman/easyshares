@@ -302,7 +302,7 @@ export default function UnifiedSharePage() {
                 <div className="p-2 bg-blue-600 rounded-lg">
                   <Code className="h-6 w-6 text-white" />
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900">ShareIt</h1>
+                <h1 className="text-2xl font-bold text-gray-900">EasyShares</h1>
               </div>
               <div className="text-sm text-gray-600">
                 Code Share
@@ -439,7 +439,7 @@ export default function UnifiedSharePage() {
                 <div className="p-2 bg-green-600 rounded-lg">
                   <FileText className="h-6 w-6 text-white" />
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900">ShareIt</h1>
+                <h1 className="text-2xl font-bold text-gray-900">EasyShares</h1>
               </div>
               <div className="text-sm text-gray-600">
                 File Share

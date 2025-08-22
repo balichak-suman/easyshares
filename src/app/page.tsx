@@ -16,7 +16,7 @@ export default function Home() {
               <div className="p-2 bg-blue-600 rounded-lg">
                 <Code className="h-6 w-6 text-white" />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">ShareIt</h1>
+              <h1 className="text-2xl font-bold text-gray-900">EasyShares</h1>
             </div>
             <div className="text-sm text-gray-600">
               Share code snippets securely
@@ -31,12 +31,11 @@ export default function Home() {
           {/* Hero Section */}
           <div className="mb-16">
             <h2 className="text-5xl font-bold text-gray-900 mb-6">
-              Share Code
-              <span className="text-blue-600"> Instantly</span>
+              Easy<span className="text-blue-600">Shares</span>
             </h2>
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Create beautiful code snippets with custom URLs or share files up to 10MB. 
-              Password-protected editing, public viewing. Perfect for tutorials, collaboration, and showcasing your work.
+              Share code snippets and files instantly with optional password protection. 
+              Create custom URLs, enjoy syntax highlighting, and collaborate effortlessly.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">

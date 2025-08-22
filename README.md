@@ -1,6 +1,25 @@
-# CodeShare
+# EasyShares
 
-A modern, secure code sharing platform built with Next.js and TypeScript. Share code snippets with password protection - only you can edit, others can view.
+A modern, secure platform for sharing code snippets and files with optional password protection and expiration dates.
+
+## Features
+
+- **Code Sharing**: Share code with syntax highlighting for 15+ programming languages
+- **File Sharing**: Upload and share files securely
+- **Password Protection**: Optional password protection for both codes and files
+- **Custom URLs**: Create custom shareable URLs
+- **Expiration**: Automatic cleanup of expired shares
+- **Modern UI**: Beautiful, responsive design with Tailwind CSS
+
+## Tech Stack
+
+- **Frontend**: Next.js 15, React 19, TypeScript
+- **Styling**: Tailwind CSS 4
+- **Database**: Vercel KV (Redis)
+- **Editor**: Monaco Editor (VS Code editor)
+- **Deployment**: Vercel
+
+## Getting Starteddern, secure code sharing platform built with Next.js and TypeScript. Share code snippets with password protection - only you can edit, others can view.
 
 ## Features
 

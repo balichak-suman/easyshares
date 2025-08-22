@@ -111,7 +111,7 @@ export default function CreatePage() {
     try {
       // Use title-based slug if title exists, otherwise use random shareId
       const finalId = title.trim() ? createSlugFromTitle(title) : shareId;
-      const finalTitle = title.trim() || 'Untitled Code Share';
+      const finalTitle = title.trim() || 'Untitled EasyShare';
       
       const response = await fetch('/api/codeshare', {
         method: 'POST',
@@ -375,7 +375,7 @@ export default function CreatePage() {
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
               <div className="border-b border-gray-200 px-4 py-3 bg-gray-50">
                 <h2 className="text-lg font-semibold text-gray-900">
-                  {title || 'Untitled Code Share'}
+                  {title || 'Untitled EasyShare'}
                 </h2>
               </div>
               
