@@ -1,183 +1,164 @@
 # EasyShares
 
-A modern, secure platform for sharing code snippets and files with optional password protection and expiration dates.
+EasyShares is a simple, secure, and beautiful platform for sharing code snippets and files. It's built with modern web technologies to provide a seamless experience for developers and anyone needing to share content quickly and securely.
+
+## Table of Contents
+
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [API Endpoints](#api-endpoints)
+- [Configuration](#configuration)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Running the Development Server](#running-the-development-server)
+- [Deployment](#deployment)
+- [Data Management](#data-management)
+- [Future Improvements](#future-improvements)
 
 ## Features
 
-- **Code Sharing**: Share code with syntax highlighting for 15+ programming languages
-- **File Sharing**: Upload and share files securely
-- **Password Protection**: Optional password protection for both codes and files
-- **Custom URLs**: Create custom shareable URLs
-- **Expiration**: Automatic cleanup of expired shares
-- **Modern UI**: Beautiful, responsive design with Tailwind CSS
+- **Code Sharing**: Share code snippets with syntax highlighting for various languages.
+- **File Sharing**: Upload and share files up to 10MB.
+- **Password Protection**: Secure your code snippets with a password. Only those with the password can edit.
+- **Custom URLs**: Use a custom title for your code share, which becomes part of the URL for easy access.
+- **View-Only Links**: Share links that allow others to view the code without editing capabilities.
+- **Auto-Deletion**: For security and privacy, code shares are automatically deleted after 14 days, and files after 3 days.
+- **Online Code Compiler**: A simple code execution environment to run and test code snippets.
+- **Responsive Design**: A clean, modern, and dark-themed UI that works on all devices.
 
 ## Tech Stack
 
-- **Frontend**: Next.js 15, React 19, TypeScript
-- **Styling**: Tailwind CSS 4
-- **Database**: Vercel KV (Redis)
-- **Editor**: Monaco Editor (VS Code editor)
-- **Deployment**: Vercel
-
-## Getting Starteddern, secure code sharing platform built with Next.js and TypeScript. Share code snippets with password protection - only you can edit, others can view.
-
-## Features
-
-- 🔒 **Password Protected Editing** - Only the creator can edit with their secret password
-- 👀 **Public Viewing** - Anyone with the link can view the code
-- 🎨 **Beautiful UI** - Clean, modern interface with responsive design
-- 🌈 **Syntax Highlighting** - Support for 15+ programming languages
-- 📋 **Easy Copying** - One-click copy functionality for code and URLs
-- ⚡ **Real-time Editing** - Monaco Editor with full IDE features
-- 🔗 **Title-Based URLs** - Your title becomes the URL: `codeshare.io/my-awesome-code`
-- ✅ **URL Availability Check** - Real-time validation of title availability
-
-## Supported Languages
-
-- JavaScript
-- TypeScript
-- Python
-- Java
-- C++
-- C#
-- Go
-- Rust
-- PHP
-- Ruby
-- HTML
-- CSS
-- JSON
-- XML
-- Markdown
-
-## How to Use
-
-1. **Create** - Click "Create New Code Share" to start
-2. **Write** - Add your code and give it a descriptive title
-3. **Automatic URL** - Your title becomes the URL (e.g., "My React Component" → `my-react-component`)
-4. **Save** - Save your code share to get a clean URL
-5. **Share** - Copy and share the URL with anyone
-6. **Edit** - Use your password to make changes anytime
-
-### Title-Based URLs
-
-Your title automatically becomes a clean URL:
-
-- ✅ **Title**: "My React Component" → **URL**: `codeshare.io/my-react-component`
-- ✅ **Title**: "API Helper Functions" → **URL**: `codeshare.io/api-helper-functions`
-- ✅ **No title** → **Random URL**: `codeshare.io/abc123xyz`
-
-Titles are automatically:
-- Converted to lowercase
-- Special characters removed
-- Spaces replaced with hyphens
-- Checked for availability in real-time
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+ 
-- npm or yarn
-
-### Installation
-
-1. Clone the repository
-```bash
-git clone <repository-url>
-cd codeshare
-```
-
-2. Install dependencies
-```bash
-npm install
-```
-
-3. Run the development server
-```bash
-npm run dev
-```
-
-4. Open [http://localhost:3000](http://localhost:3000) in your browser
+- **Framework**: [Next.js 14](https://nextjs.org/) (with App Router)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
+- **Code Editor**: [@monaco-editor/react](https://www.npmjs.com/package/@monaco-editor/react)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Deployment**: [Vercel](https://vercel.com/)
 
 ## Project Structure
 
+The project follows the standard Next.js App Router structure.
+
 ```
-src/
-├── app/                    # Next.js App Router
-│   ├── api/               # API routes
-│   │   └── codeshare/     # CodeShare API endpoints
-│   ├── create/[id]/       # Create new code share page
-│   ├── share/[id]/        # View shared code page
-│   ├── globals.css        # Global styles
-│   ├── layout.tsx         # Root layout
-│   └── page.tsx           # Home page
-└── lib/
-    └── dataStore.ts       # In-memory data storage
+.
+├── data/
+│   ├── codeshares.json   # Stores code share data
+│   └── files.json        # Stores file metadata
+├── public/               # Static assets
+├── src/
+│   ├── app/
+│   │   ├── api/          # API routes
+│   │   ├── [title]/      # Dynamic route for viewing shares
+│   │   ├── create/[id]/  # Page for creating new code shares
+│   │   ├── execute/      # Online code compiler page
+│   │   ├── share/[id]/   # Page for viewing file shares
+│   │   ├── upload/[id]/  # Page for uploading files
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   └── page.tsx      # Home page
+│   ├── components/
+│   │   └── Footer.tsx
+│   └── lib/
+│       ├── dataStore.ts            # Data access logic (development)
+│       └── productionDataStore.ts  # Data access logic (production)
+├── next.config.ts
+├── package.json
+└── tsconfig.json
 ```
 
 ## API Endpoints
 
-- `POST /api/codeshare` - Create a new code share (supports custom slugs)
-- `GET /api/codeshare/[id]` - Get a code share by ID or custom slug
-- `PUT /api/codeshare/[id]` - Update a code share (requires password)
-- `POST /api/codeshare/[id]/auth` - Authenticate for editing
-- `GET /api/codeshare/check-slug` - Check custom slug availability
+The application uses several API endpoints to manage code and file shares.
 
-## Technologies Used
+### Code Sharing
 
-- **Next.js 15** - React framework with App Router
-- **TypeScript** - Type-safe JavaScript
-- **Tailwind CSS** - Utility-first CSS framework
-- **Monaco Editor** - VS Code editor in the browser
-- **Lucide React** - Beautiful icons
-- **bcryptjs** - Password hashing
-- **UUID** - Unique ID generation
+- **`POST /api/codeshare`**: Creates a new code share.
+- **`GET /api/codeshare/[id]`**: Retrieves a code share by its ID.
+- **`PUT /api/codeshare/[id]`**: Updates an existing code share.
+- **`DELETE /api/codeshare/[id]`**: Deletes a code share.
+- **`POST /api/codeshare/[id]/auth`**: Authenticates a user with a password to allow editing.
+- **`POST /api/codeshare/check-slug`**: Checks if a custom URL slug is already taken.
 
-## Security Features
+### File Sharing
 
-- Password hashing with bcrypt
-- No password storage in client-side code
-- Server-side authentication for all edit operations
-- Read-only access by default for shared links
-- Data persistence with local JSON file storage
-- Automatic data backup on every save/update
+- **`POST /api/files`**: Handles file uploads. It saves the file to the `uploads/` directory and its metadata to `data/files.json`.
+- **`GET /api/files?id=[id]`**: Downloads a file based on its ID.
 
-## Production Deployment
+### Compiler
 
-For production use, replace the in-memory `dataStore` with a proper database:
+The project uses a simple API endpoint for code execution, which is handled by the `/api/execute` route. This is a placeholder and can be integrated with a more robust code execution engine.
 
-- MongoDB
-- PostgreSQL
-- SQLite
-- Any database of your choice
+## Configuration
 
-Update the API routes in `src/app/api/codeshare/` to use your database instead of the in-memory store.
+- **`next.config.ts`**: Standard Next.js configuration.
+- **`tsconfig.json`**: TypeScript compiler options.
+- **`postcss.config.mjs`**: PostCSS configuration, primarily for Tailwind CSS.
+- **`eslint.config.mjs`**: ESLint configuration for code linting.
 
-## Data Persistence
+## Getting Started
 
-Your code shares are **automatically saved and persist between restarts**! 
+Follow these instructions to set up and run the project locally.
 
-- ✅ **Persistent Storage** - Data saved to `codeshare-data.json` file
-- ✅ **Survives Restarts** - All your code shares remain after stopping/starting the server
-- ✅ **Automatic Backup** - No manual saving required
-- 🔒 **Local Only** - Data stays on your machine (not shared with anyone)
+### Prerequisites
 
-### Storage Details
+- [Node.js](https://nodejs.org/en/) (v18 or later)
+- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
 
-- **File Location**: `codeshare-data.json` in the project root
-- **Format**: Human-readable JSON format
-- **Security**: Passwords are hashed with bcrypt (never stored in plain text)
-- **Git Ignored**: Data file is automatically ignored by git
+### Installation
 
-### Production Note
+1.  Clone the repository:
+    ```bash
+    git clone https://github.com/balichak-suman/easyshares.git
+    cd easyshares
+    ```
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
 
-For production deployment, replace the JSON file storage with a proper database:
-- **PostgreSQL** (recommended for production)
-- **MongoDB** (good for document-based storage)
-- **SQLite** (simple file-based database)
-- **MySQL/MariaDB** (traditional relational database)
+### Running the Development Server
 
----
+Start the development server by running:
 
-Built with ❤️ using Next.js and TypeScript
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
+
+## Deployment
+
+The application is configured for easy deployment on [Vercel](https://vercel.com/).
+
+- **Production Domain**: [https://shareit-csomzn1jt-balichak-sumans-projects.vercel.app/](https://shareit-csomzn1jt-balichak-sumans-projects.vercel.app/)
+
+To deploy your own instance, you can use the Vercel CLI:
+
+1.  Install the Vercel CLI:
+    ```bash
+    npm i -g vercel
+    ```
+2.  Deploy to production:
+    ```bash
+    vercel --prod
+    ```
+
+## Data Management
+
+The application uses a simple file-based database for storing data.
+
+- **`data/codeshares.json`**: Stores all code snippets as an array of JSON objects.
+- **`data/files.json`**: Stores metadata for all uploaded files.
+- **`uploads/`**: This directory (created automatically) stores the actual uploaded files.
+
+**Note**: This data storage method is not suitable for large-scale production use. For a more robust solution, consider migrating to a database like PostgreSQL, MongoDB, or a serverless option like Vercel Postgres.
+
+## Future Improvements
+
+- **Database Migration**: Replace the JSON file database with a scalable SQL or NoSQL database.
+- **User Accounts**: Implement user authentication to allow users to manage their shares.
+- **Enhanced Compiler**: Integrate a more powerful and secure code execution engine.
+- **Team Collaboration**: Add features for teams to share and collaborate on code snippets.
+- **Analytics**: Provide view counts and other analytics for shared links.
