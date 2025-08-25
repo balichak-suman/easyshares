@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Editor from '@monaco-editor/react';
-import Footer from '@/components/Footer';
 import { Copy, Save, Check, ArrowLeft, Code, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 
@@ -307,7 +306,11 @@ export default function CreatePage() {
                     <div className="h-4 mt-2 text-sm">
                       {titleChecking && <p className="text-blue-400">Checking...</p>}
                       {titleError && <p className="text-red-400">{titleError}</p>}
-                      {titleAvailable === true && <p className="text-green-400">Title is available!</p>}
+                      {titleAvailable === true && (
+                        <p className="text-green-400 truncate">
+                          URL: {`${typeof window !== 'undefined' ? window.location.origin : ''}/${createSlugFromTitle(title)}`}
+                        </p>
+                      )}
                       {titleAvailable === false && <p className="text-red-400">This title is already taken.</p>}
                     </div>
                </div>
@@ -353,7 +356,6 @@ export default function CreatePage() {
           </div>
         )}
       </main>
-      <Footer />
     </div>
   );
 }

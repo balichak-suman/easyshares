@@ -4,7 +4,6 @@ import { useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Upload, ArrowLeft, Lock, Eye, EyeOff, Share2, FileText, AlertCircle, Copy, Check } from 'lucide-react';
-import Footer from '@/components/Footer';
 
 export default function UploadPage() {
   const params = useParams();
@@ -408,9 +407,6 @@ export default function UploadPage() {
           </div>
         </div>
       </main>
-
-      {/* Footer */}
-      <Footer />
     </div>
   );
 }

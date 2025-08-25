@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCodeShare, getFileShare } from '@/lib/database';
+import { getCodeShare, getFileShare } from '@/lib/dataStore';
 
 export async function GET(request: NextRequest) {
   try {

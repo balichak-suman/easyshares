@@ -5,8 +5,9 @@ import {
   addFileShare, 
   deleteFileShare,
   cleanupExpiredShares,
-  type FileShare 
-} from '@/lib/database';
+  type FileShare,
+  getCodeShare
+} from '@/lib/dataStore';
 
 export async function GET(request: NextRequest) {
   try {
@@ -81,7 +82,7 @@ export async function POST(request: NextRequest) {
     
     // Check if slug is used in code or file shares and not expired
     const existingFileShare = await getFileShare(slug);
-    const existingCodeShare = await (await import('@/lib/database')).getCodeShare(slug);
+    const existingCodeShare = await getCodeShare(slug);
     const now = new Date();
     if (
       (existingFileShare && new Date(existingFileShare.expiresAt) > now) ||
@@ -160,7 +161,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    if (action === 'download') {
+    if (action === 'download' || action === 'view') {
       // Check if this share has a password
       if (share.hasPassword) {
         if (!password) {
@@ -180,7 +181,7 @@ export async function PUT(request: NextRequest) {
         }
       }
 
-      // Return file content for download
+      // Return file content for download or viewing
       return NextResponse.json({
         fileName: share.fileName,
         mimeType: share.mimeType,

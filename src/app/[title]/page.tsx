@@ -4,8 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Editor from '@monaco-editor/react';
 import { Copy, Edit3, Eye, Code, Check, AlertTriangle, Download, FileText, Save } from 'lucide-react';
-import Footer from '@/components/Footer';
 import Link from 'next/link';
+import mammoth from 'mammoth';
 
 interface CodeShare {
   id: string;
@@ -40,11 +40,15 @@ export default function UnifiedSharePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [password, setPassword] = useState('');
   const [editCode, setEditCode] = useState('');
+  const [editLanguage, setEditLanguage] = useState('');
   const [copied, setCopied] = useState(false);
   const [saving, setSaving] = useState(false);
   const [authError, setAuthError] = useState('');
   const [downloading, setDownloading] = useState(false);
-  
+  const [viewing, setViewing] = useState(false);
+  const [previewContent, setPreviewContent] = useState<string | null>(null);
+  const [previewError, setPreviewError] = useState('');
+
   const params = useParams();
   const shareTitle = params.title as string;
 
@@ -65,6 +69,7 @@ export default function UnifiedSharePage() {
         console.log('Code share data:', data);
         setCodeShare(data);
         setEditCode(data.code);
+        setEditLanguage(data.language);
         setShareType('code');
         return;
       }
@@ -156,6 +161,7 @@ export default function UnifiedSharePage() {
         body: JSON.stringify({
           title: shareTitle,
           code: editCode,
+          language: editLanguage,
           password,
         }),
       });
@@ -184,6 +190,7 @@ export default function UnifiedSharePage() {
     setAuthError('');
     if (codeShare) {
       setEditCode(codeShare.code);
+      setEditLanguage(codeShare.language);
     }
   };
 
@@ -243,6 +250,71 @@ export default function UnifiedSharePage() {
     }
   };
 
+  const handleView = async () => {
+    if (!fileShare) return;
+
+    if (fileShare.hasPassword && !password.trim()) {
+      setAuthError('Password is required to view this file');
+      return;
+    }
+
+    setViewing(true);
+    setAuthError('');
+    setPreviewError('');
+    setPreviewContent(null);
+
+    try {
+      const response = await fetch('/api/files', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: shareTitle,
+          password,
+          action: 'view',
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const mimeType = data.mimeType;
+        const byteCharacters = atob(data.content);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: mimeType });
+
+        if (mimeType.startsWith('text/')) {
+          const text = await blob.text();
+          setPreviewContent(`<pre style="white-space: pre-wrap; word-wrap: break-word;">${text}</pre>`);
+        } else if (mimeType.startsWith('image/')) {
+          const url = URL.createObjectURL(blob);
+          setPreviewContent(`<img src="${url}" alt="Image preview" style="max-width: 100%; height: auto;" />`);
+        } else if (mimeType === 'application/pdf') {
+          const url = URL.createObjectURL(blob);
+          setPreviewContent(`<iframe src="${url}" style="width: 100%; height: 80vh;" title="PDF preview"></iframe>`);
+        } else if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+          const arrayBuffer = await blob.arrayBuffer();
+          const result = await mammoth.convertToHtml({ arrayBuffer });
+          setPreviewContent(result.value);
+        } else {
+          setPreviewError('This file type cannot be previewed.');
+        }
+      } else if (response.status === 401) {
+        setAuthError('Invalid password');
+      } else {
+        const errorData = await response.json();
+        setPreviewError(errorData.error || 'Failed to load preview');
+      }
+    } catch (err) {
+      setPreviewError('Failed to load preview.');
+      console.error(err);
+    } finally {
+      setViewing(false);
+    }
+  };
+
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -271,10 +343,10 @@ export default function UnifiedSharePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950 flex items-center justify-center text-neutral-100">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading share...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 mx-auto mb-4"></div>
+          <p className="text-neutral-300">Loading share...</p>
         </div>
       </div>
     );
@@ -282,11 +354,11 @@ export default function UnifiedSharePage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950 flex items-center justify-center text-neutral-100">
         <div className="max-w-md mx-auto text-center p-8">
           <AlertTriangle className="h-16 w-16 text-red-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Share Not Found</h1>
-          <p className="text-gray-600">{error}</p>
+          <h1 className="text-2xl font-bold text-neutral-100 mb-2">Share Not Found</h1>
+          <p className="text-neutral-300">{error}</p>
         </div>
       </div>
     );
@@ -295,18 +367,18 @@ export default function UnifiedSharePage() {
   // Render code share
   if (shareType === 'code' && codeShare) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="min-h-screen bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950 font-sans text-neutral-100">
         {/* Header */}
-        <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm">
+        <header className="border-b border-neutral-800 bg-neutral-950/80 backdrop-blur-sm">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
               <Link href="/" className="flex items-center space-x-3">
                 <div className="p-2 bg-blue-600 rounded-lg">
                   <Code className="h-6 w-6 text-white" />
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900">EasyShares</h1>
+                <h1 className="text-2xl font-bold text-neutral-100">EasyShares</h1>
               </Link>
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-neutral-400">
                 Code Share
               </div>
             </div>
@@ -316,11 +388,11 @@ export default function UnifiedSharePage() {
         <div className="container mx-auto px-4 py-6">
           <div className="max-w-6xl mx-auto">
             {/* Share Info */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+            <div className="bg-neutral-900 rounded-lg border border-neutral-800 p-6 mb-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold text-gray-900">{codeShare.title}</h2>
+                <h2 className="text-2xl font-bold text-neutral-100">{codeShare.title}</h2>
                 <div className="flex items-center space-x-3">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-900/50 text-blue-300">
                     {codeShare.language}
                   </span>
                   <button
@@ -333,7 +405,7 @@ export default function UnifiedSharePage() {
                 </div>
               </div>
               
-              <div className="flex items-center space-x-4 text-sm text-gray-500">
+              <div className="flex items-center space-x-4 text-sm text-neutral-400">
                 <span>Created: {formatDate(codeShare.createdAt)}</span>
                 <span>•</span>
                 <span>Expires in {getDaysUntilExpiry(codeShare.expiresAt)} days</span>
@@ -341,9 +413,9 @@ export default function UnifiedSharePage() {
             </div>
 
             {/* Editor / View */}
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-              <div className="border-b border-gray-200 px-4 py-3 bg-gray-50 flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900">Code</h3>
+            <div className="bg-neutral-900 rounded-lg border border-neutral-800 overflow-hidden">
+              <div className="border-b border-neutral-800 px-4 py-3 bg-neutral-800/30 flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-neutral-100">Code</h3>
                 
                 {!isEditing && codeShare.hasPassword && (
                   <div className="flex items-center space-x-2">
@@ -352,7 +424,7 @@ export default function UnifiedSharePage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Enter edit password"
-                      className="px-3 py-1.5 border border-gray-300 rounded text-sm text-gray-900"
+                      className="px-3 py-1.5 border border-neutral-700 bg-neutral-950 rounded text-sm text-neutral-100"
                     />
                     <button
                       onClick={handleEdit}
@@ -365,8 +437,8 @@ export default function UnifiedSharePage() {
                 )}
 
                 {!isEditing && !codeShare.hasPassword && (
-                  <div className="text-sm text-gray-500">
-                    <span className="inline-flex items-center px-2 py-1 rounded-md bg-gray-100 text-gray-600">
+                  <div className="text-sm text-neutral-400">
+                    <span className="inline-flex items-center px-2 py-1 rounded-md bg-neutral-800 text-neutral-300">
                       <Eye className="h-4 w-4 mr-1" />
                       Public View-Only
                     </span>
@@ -375,9 +447,26 @@ export default function UnifiedSharePage() {
                 
                 {isEditing && (
                   <div className="flex items-center space-x-2">
+                    <select
+                      value={editLanguage}
+                      onChange={(e) => setEditLanguage(e.target.value)}
+                      className="px-3 py-1.5 border border-neutral-700 bg-neutral-950 rounded text-sm text-neutral-100"
+                    >
+                      <option value="javascript">JavaScript</option>
+                      <option value="typescript">TypeScript</option>
+                      <option value="python">Python</option>
+                      <option value="java">Java</option>
+                      <option value="csharp">C#</option>
+                      <option value="go">Go</option>
+                      <option value="rust">Rust</option>
+                      <option value="html">HTML</option>
+                      <option value="css">CSS</option>
+                      <option value="json">JSON</option>
+                      <option value="markdown">Markdown</option>
+                    </select>
                     <button
                       onClick={handleCancel}
-                      className="px-3 py-1.5 border border-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-50 transition-colors"
+                      className="px-3 py-1.5 border border-neutral-700 text-neutral-300 text-sm rounded-lg hover:bg-neutral-800 transition-colors"
                     >
                       Cancel
                     </button>
@@ -398,18 +487,18 @@ export default function UnifiedSharePage() {
               </div>
               
               {authError && (
-                <div className="bg-red-50 border-l-4 border-red-400 p-4">
-                  <p className="text-red-700 text-sm">{authError}</p>
+                <div className="bg-red-900/20 border-l-4 border-red-500 p-4">
+                  <p className="text-red-400 text-sm">{authError}</p>
                 </div>
               )}
               
               <div className="h-[500px]">
                 <Editor
                   height="100%"
-                  language={codeShare.language}
+                  language={isEditing ? editLanguage : codeShare.language}
                   value={isEditing ? editCode : codeShare.code}
                   onChange={(value) => isEditing && setEditCode(value || '')}
-                  theme="vs-light"
+                  theme="vs-dark"
                   options={{
                     readOnly: !isEditing,
                     minimap: { enabled: false },
@@ -425,7 +514,7 @@ export default function UnifiedSharePage() {
             </div>
           </div>
         </div>
-        <Footer />
+        {/* <Footer /> */}
       </div>
     );
   }
@@ -433,18 +522,18 @@ export default function UnifiedSharePage() {
   // Render file share
   if (shareType === 'file' && fileShare) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="min-h-screen bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950 font-sans text-neutral-100">
         {/* Header */}
-        <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm">
+        <header className="border-b border-neutral-800 bg-neutral-950/80 backdrop-blur-sm">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
               <Link href="/" className="flex items-center space-x-3">
                 <div className="p-2 bg-green-600 rounded-lg">
                   <FileText className="h-6 w-6 text-white" />
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900">EasyShares</h1>
+                <h1 className="text-2xl font-bold text-neutral-100">EasyShares</h1>
               </Link>
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-neutral-400">
                 File Share
               </div>
             </div>
@@ -454,90 +543,99 @@ export default function UnifiedSharePage() {
         <div className="container mx-auto px-4 py-6">
           <div className="max-w-4xl mx-auto">
             {/* File Info */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="bg-neutral-900 rounded-xl shadow-lg border border-neutral-800 p-6">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">{fileShare.title}</h2>
+                  <h2 className="text-2xl font-bold text-neutral-100 mb-2">{fileShare.title}</h2>
                   {fileShare.description && (
-                    <p className="text-gray-600">{fileShare.description}</p>
+                    <p className="text-neutral-300">{fileShare.description}</p>
                   )}
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-neutral-400">
                     Expires in {getDaysUntilExpiry(fileShare.expiresAt)} days
                   </p>
                 </div>
               </div>
 
-              <div className="border rounded-lg p-4 bg-gray-50">
+              <div className="border border-neutral-800 rounded-lg p-4 bg-neutral-800/30">
                 <div className="flex items-center space-x-4">
-                  <FileText className="h-12 w-12 text-gray-400" />
+                  <FileText className="h-12 w-12 text-neutral-500" />
                   <div className="flex-1">
-                    <h3 className="font-medium text-gray-900">{fileShare.fileName}</h3>
-                    <p className="text-sm text-gray-500">{formatFileSize(fileShare.fileSize)}</p>
-                    <p className="text-xs text-gray-400">Created: {formatDate(fileShare.createdAt)}</p>
+                    <h3 className="font-medium text-neutral-100">{fileShare.fileName}</h3>
+                    <p className="text-sm text-neutral-400">{formatFileSize(fileShare.fileSize)}</p>
+                    <p className="text-xs text-neutral-500">Created: {formatDate(fileShare.createdAt)}</p>
                   </div>
                   
-                  <div className="flex flex-col space-y-2">
-                    {fileShare.hasPassword ? (
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="password"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          placeholder="Enter password"
-                          className="px-3 py-1.5 border border-gray-300 rounded text-sm text-gray-900"
-                        />
-                        <button
-                          onClick={handleDownload}
-                          disabled={downloading}
-                          className="inline-flex items-center space-x-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm rounded-lg transition-colors"
-                        >
-                          {downloading ? (
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                          ) : (
-                            <Download className="h-4 w-4" />
-                          )}
-                          <span>{downloading ? 'Downloading...' : 'Download'}</span>
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={handleDownload}
-                        disabled={downloading}
-                        className="inline-flex items-center space-x-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm rounded-lg transition-colors"
-                      >
-                        {downloading ? (
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        ) : (
-                          <Download className="h-4 w-4" />
-                        )}
-                        <span>{downloading ? 'Downloading...' : 'Download'}</span>
-                      </button>
+                  <div className="flex items-center space-x-2">
+                    {fileShare.hasPassword && (
+                      <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Enter password"
+                        className="px-3 py-1.5 border border-neutral-700 bg-neutral-950 rounded text-sm text-neutral-100"
+                      />
                     )}
+                    <button
+                      onClick={handleView}
+                      disabled={viewing}
+                      className="inline-flex items-center space-x-2 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white text-sm rounded-lg transition-colors"
+                    >
+                      {viewing ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                      <span>{viewing ? 'Loading...' : 'View'}</span>
+                    </button>
+                    <button
+                      onClick={handleDownload}
+                      disabled={downloading}
+                      className="inline-flex items-center space-x-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm rounded-lg transition-colors"
+                    >
+                      {downloading ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      ) : (
+                        <Download className="h-4 w-4" />
+                      )}
+                      <span>{downloading ? 'Downloading...' : 'Download'}</span>
+                    </button>
                   </div>
                 </div>
               </div>
               
               {authError && (
-                <div className="bg-red-50 border-l-4 border-red-400 p-4 mt-4">
-                  <p className="text-red-700 text-sm">{authError}</p>
+                <div className="bg-red-900/20 border-l-4 border-red-500 p-4 mt-4">
+                  <p className="text-red-400 text-sm">{authError}</p>
+                </div>
+              )}
+
+              {previewContent && (
+                <div className="mt-6 border-t border-neutral-800 pt-6">
+                  <h3 className="text-xl font-bold text-neutral-100 mb-4">File Preview</h3>
+                  <div id="pptx-preview" className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: previewContent }} />
+                </div>
+              )}
+              {previewError && (
+                <div className="bg-yellow-900/20 border-l-4 border-yellow-500 p-4 mt-4">
+                  <p className="text-yellow-400 text-sm">{previewError}</p>
                 </div>
               )}
             </div>
           </div>
         </div>
-        <Footer />
+        {/* <Footer /> */}
       </div>
     );
   }
 
   // Fallback - should not reach here
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950 flex items-center justify-center text-neutral-100">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-        <p className="text-gray-600">Loading...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 mx-auto mb-4"></div>
+        <p className="text-neutral-300">Loading...</p>
       </div>
     </div>
   );

@@ -1,5 +1,4 @@
 "use client";
-import Footer from '@/components/Footer';
 
 import { Shield, Code, Edit3, Lock, Share2, Eye, FileText, Upload } from 'lucide-react';
 import Link from 'next/link';
@@ -186,9 +185,6 @@ export default function Home() {
           </div>
         </div>
       </main>
-
-      {/* Footer */}
-      <Footer />
     </div>
   );
 }

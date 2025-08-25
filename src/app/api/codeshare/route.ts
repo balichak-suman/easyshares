@@ -7,7 +7,7 @@ import {
   deleteCodeShare,
   cleanupExpiredShares,
   type CodeShare 
-} from '@/lib/database';
+} from '@/lib/dataStore';
 
 export async function GET(request: NextRequest) {
   try {
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     
     // Check if slug is used in code or file shares and not expired
     const existingCodeShare = await getCodeShare(slug);
-    const existingFileShare = await (await import('@/lib/database')).getFileShare(slug);
+    const existingFileShare = await (await import('@/lib/dataStore')).getFileShare(slug);
     const now = new Date();
     if (
       (existingCodeShare && new Date(existingCodeShare.expiresAt) > now) ||
@@ -123,18 +123,18 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { title, code, password } = body;
+    const { title, code, language, password } = body;
 
-    if (!title || !code) {
+    if (!title || !code || !password) {
       return NextResponse.json(
-        { error: 'Title and code are required' },
+        { error: 'Missing required fields' },
         { status: 400 }
       );
     }
 
-    const share = await getCodeShare(title);
+    const existingShare = await getCodeShare(title);
 
-    if (!share) {
+    if (!existingShare) {
       return NextResponse.json(
         { error: 'Code share not found' },
         { status: 404 }
@@ -142,42 +142,32 @@ export async function PUT(request: NextRequest) {
     }
 
     // Check if share has expired
-    if (new Date(share.expiresAt) <= new Date()) {
+    if (new Date(existingShare.expiresAt) <= new Date()) {
       return NextResponse.json(
-        { error: 'Code share has expired' },
-        { status: 404 }
+        { error: 'This code share has expired and cannot be edited.' },
+        { status: 410 } // 410 Gone
       );
     }
 
-    // Check if this share has a password
-    if (share.hasPassword) {
-      if (!password) {
-        return NextResponse.json(
-          { error: 'Password is required to edit this code share' },
-          { status: 401 }
-        );
-      }
-
-      // Verify password
-      const isPasswordValid = await bcrypt.compare(password, share.passwordHash);
-      if (!isPasswordValid) {
-        return NextResponse.json(
-          { error: 'Invalid password' },
-          { status: 401 }
-        );
-      }
-    } else {
-      // Public code share - no password needed, but also no editing allowed
+    // Verify password
+    const isPasswordValid = await bcrypt.compare(password, existingShare.passwordHash);
+    if (!isPasswordValid) {
       return NextResponse.json(
-        { error: 'This code share is public and cannot be edited' },
-        { status: 403 }
+        { error: 'Invalid password' },
+        { status: 401 }
       );
     }
 
-    // Update the code
-    const updatedShare = await updateCodeShare(title, { code });
+    // Update the share
+    const updatedShareData: Partial<CodeShare> = { code };
+    if (language) {
+      updatedShareData.language = language;
+    }
+    
+    const updatedShare = await updateCodeShare(title, updatedShareData);
 
     if (!updatedShare) {
+      // This case should ideally not be reached if getCodeShare found it
       return NextResponse.json(
         { error: 'Failed to update code share' },
         { status: 500 }

@@ -10,7 +10,7 @@ interface CodeShare {
   createdAt: string;
 }
 
-class ProductionDataStore {
+export class ProductionDataStore {
   private codeShares: Record<string, CodeShare> = {};
   private isProduction = process.env.NODE_ENV === 'production';
 
@@ -74,5 +74,8 @@ class ProductionDataStore {
 
 // Create a singleton instance
 const dataStore = new ProductionDataStore();
+
+export const getCodeShare = dataStore.get.bind(dataStore);
+export const getFileShare = dataStore.get.bind(dataStore);
 
 export default dataStore;
